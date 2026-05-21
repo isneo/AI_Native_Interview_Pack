@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Native 风控审核 Agent｜概念澄清补充</title>
+  <style>
+    :root {
+      --bg: #f5f2ea;
+      --paper: #fffdf7;
+      --ink: #1f2523;
+      --muted: #6e746f;
+      --line: #d9d2c2;
+      --line-strong: #b9ad96;
+      --green: #246b57;
+      --green-soft: #e4efe9;
+      --blue: #275f89;
+      --blue-soft: #e5eef5;
+      --red: #9f3f34;
+      --red-soft: #f4e4df;
+      --amber: #a96d1d;
+      --amber-soft: #f6ead6;
+      --slate: #39434b;
+      --shadow: 0 18px 45px rgba(31, 37, 35, .10);
+      --radius: 8px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(31,37,35,.035) 1px, transparent 1px) 0 0 / 24px 24px,
+        linear-gradient(180deg, rgba(31,37,35,.028) 1px, transparent 1px) 0 0 / 24px 24px,
+        var(--bg);
+      font-family: var(--sans);
+      line-height: 1.55;
+      overflow-x: hidden;
+    }
+
+    button { font: inherit; }
+    button {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform .16s ease, border-color .16s ease, background .16s ease, color .16s ease;
+    }
+    button:hover { transform: translateY(-1px); border-color: var(--line-strong); }
+    button:focus-visible, details:focus-within { outline: 3px solid rgba(36,107,87,.22); outline-offset: 2px; }
+
+    .page { width: min(1480px, calc(100vw - 32px)); margin: 0 auto; padding: 24px 0 56px; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      padding: 14px 0 16px;
+      background: linear-gradient(180deg, var(--bg) 72%, rgba(245,242,234,0));
+    }
+    .brandline { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+    .brandline h1 { margin: 0; font-size: 22px; line-height: 1.2; letter-spacing: 0; overflow-wrap: anywhere; }
+    .brandline span { color: var(--muted); font-size: 13px; white-space: nowrap; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .actions button { padding: 8px 10px; font-size: 13px; }
+    .actions .primary { background: var(--green); color: #fff; border-color: var(--green); }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(320px, .85fr);
+      gap: 18px;
+      align-items: stretch;
+      margin: 8px 0 18px;
+    }
+    .thesis, .scorecard, .board, .script, .qa-zone {
+      border: 1px solid var(--line);
+      background: rgba(255,253,247,.9);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+    }
+    .thesis { padding: 22px; }
+    .kicker { color: var(--green); font-weight: 800; font-size: 13px; margin-bottom: 8px; }
+    .thesis h2 {
+      margin: 0 0 10px;
+      max-width: 980px;
+      font-size: clamp(30px, 3vw, 48px);
+      line-height: 1.08;
+      letter-spacing: 0;
+      overflow-wrap: anywhere;
+    }
+    .thesis p { margin: 0; max-width: 920px; color: #444b47; font-size: 17px; }
+    .scorecard { padding: 18px; display: grid; align-content: center; gap: 12px; }
+    .scoreline { display: grid; grid-template-columns: 92px 1fr 62px; align-items: center; gap: 9px; font-size: 13px; }
+    .bar { height: 9px; border: 1px solid var(--line); background: #f3efe5; border-radius: 999px; overflow: hidden; }
+    .bar span { display: block; height: 100%; background: var(--green); border-radius: inherit; }
+    .scoreline:nth-child(2) .bar span { background: var(--blue); }
+    .scoreline:nth-child(3) .bar span { background: var(--amber); }
+    .scoreline:nth-child(4) .bar span { background: var(--red); }
+
+    .navstrip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 0 14px;
+      scrollbar-width: thin;
+    }
+    .navstrip button {
+      min-width: max-content;
+      padding: 10px 12px;
+      font-weight: 700;
+      font-size: 13px;
+      background: rgba(255,253,247,.74);
+    }
+    .navstrip button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+    .workbench {
+      display: grid;
+      grid-template-columns: minmax(520px, 1.08fr) minmax(360px, .82fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .board, .script, .qa-zone { padding: 16px; }
+    .script {
+      position: sticky;
+      top: 74px;
+      max-height: calc(100vh - 92px);
+      overflow: auto;
+    }
+    .pane-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .pane-head h2, .qa-zone h2 { margin: 0; font-size: 20px; letter-spacing: 0; }
+    .smallcap { color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+    .chip, .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 4px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--paper);
+      color: var(--slate);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .definition {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fffaf0;
+    }
+    .definition h3 { margin: 0; font-size: 24px; line-height: 1.18; letter-spacing: 0; }
+    .definition p { margin: 0; color: #3f4743; font-size: 15px; }
+    .essence {
+      padding: 12px;
+      border-left: 4px solid var(--green);
+      background: var(--green-soft);
+      border-radius: 6px;
+      font-weight: 800;
+    }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .cell {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      padding: 12px;
+      min-width: 0;
+    }
+    .cell h4 { margin: 0 0 6px; font-size: 16px; line-height: 1.25; }
+    .cell p { margin: 0; color: var(--muted); font-size: 14px; }
+    .cell.green { background: var(--green-soft); border-color: rgba(36,107,87,.24); }
+    .cell.blue { background: var(--blue-soft); border-color: rgba(39,95,137,.23); }
+    .cell.amber { background: var(--amber-soft); border-color: rgba(169,109,29,.24); }
+    .cell.red { background: var(--red-soft); border-color: rgba(159,63,52,.24); }
+
+    .compare {
+      display: grid;
+      grid-template-columns: 140px minmax(0, 1fr) minmax(0, 1fr);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 12px 0;
+      background: var(--paper);
+    }
+    .compare div { padding: 10px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); min-width: 0; }
+    .compare div:nth-child(3n) { border-right: 0; }
+    .compare div:nth-last-child(-n + 3) { border-bottom: 0; }
+    .compare .head { font-weight: 900; background: #efe8da; }
+    .compare .label { color: var(--muted); font-weight: 800; }
+
+    .flow {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .flow-node {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 10px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      border-radius: var(--radius);
+    }
+    .num {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: var(--green);
+      color: #fff;
+      font-weight: 900;
+      font-size: 13px;
+    }
+    .flow-node b { display: block; line-height: 1.25; }
+    .flow-node span { color: var(--muted); font-size: 13px; }
+
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .tabs button { padding: 8px 10px; font-size: 13px; font-weight: 800; }
+    .tabs button.active { background: var(--green); color: #fff; border-color: var(--green); }
+    .talk-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fffaf0;
+      padding: 13px;
+      margin-bottom: 12px;
+    }
+    .talk-card h3 { margin: 0 0 8px; font-size: 15px; letter-spacing: 0; }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: 0;
+      color: #2f3733;
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .note-list { margin: 0; padding-left: 18px; color: #3d4541; }
+    .note-list li { margin: 6px 0; }
+    .chip-row { display: flex; gap: 7px; flex-wrap: wrap; }
+
+    .qa-zone { margin-top: 18px; }
+    .qa-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .qa-tools { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    .qa-tools button { padding: 8px 10px; font-size: 13px; font-weight: 800; }
+    .qa-tools button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .qa-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    details {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      border-radius: var(--radius);
+      padding: 12px;
+    }
+    summary { cursor: pointer; font-weight: 900; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary span { display: block; margin-top: 4px; color: var(--green); font-size: 12px; }
+    details p { margin: 10px 0 0; color: #3f4743; font-size: 14px; }
+
+    .copy-toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 50;
+      padding: 10px 12px;
+      background: var(--ink);
+      color: #fff;
+      border-radius: 6px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .16s ease, transform .16s ease;
+      pointer-events: none;
+    }
+    .copy-toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 1120px) {
+      .intro, .workbench { grid-template-columns: 1fr; }
+      .script { position: static; max-height: none; }
+      .grid-3, .grid-2, .qa-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .page { width: min(100vw - 20px, 1480px); padding-bottom: 32px; }
+      .page, .topbar, .intro, .workbench, .board, .script, .qa-zone { min-width: 0; }
+      .topbar, .qa-head { grid-template-columns: 1fr; }
+      .brandline { display: grid; gap: 4px; }
+      .brandline h1 { font-size: 18px; word-break: break-all; }
+      .brandline span { white-space: normal; }
+      .actions, .qa-tools { justify-content: flex-start; }
+      .thesis { padding: 16px; }
+      .thesis h2 { font-size: 32px; word-break: break-all; }
+      .thesis p { overflow-wrap: anywhere; word-break: break-word; }
+      .board, .script, .qa-zone { padding: 12px; }
+      .compare { grid-template-columns: 1fr; }
+      .compare div, .compare div:nth-child(3n), .compare div:nth-last-child(-n + 3) { border-right: 0; border-bottom: 1px solid var(--line); }
+      .compare div:last-child { border-bottom: 0; }
+      .scoreline { grid-template-columns: 82px minmax(0, 1fr); }
+      .scoreline strong { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="brandline">
+        <h1>AI Native 风控审核 Agent｜概念澄清补充</h1>
+        <span>定义澄清 · 本质提炼 · 后续整合素材</span>
+      </div>
+      <div class="actions">
+        <button id="copyCurrent" class="primary">复制当前答法</button>
+        <button id="copyPrompt">复制训练 Prompt</button>
+        <button id="copyJson">导出 JSON</button>
+      </div>
+    </header>
+
+    <section class="intro" aria-label="补充定位">
+      <div class="thesis">
+        <div class="kicker">Clarify Before Integrating</div>
+        <h2>先把概念边界讲透，再把项目故事讲顺。</h2>
+        <p>这份补充页不替代原训练手册，而是给“AI+ vs AI Native、人机协作、领域终态、artifact、数据飞轮、能力证明和岗位差异化”做定义、澄清和本质提炼，后续可整合进主手册。</p>
+      </div>
+      <div class="scorecard" aria-label="面试信号速查">
+        <div class="scoreline"><span>认知高度</span><div class="bar"><span style="width: 94%"></span></div><strong>领先</strong></div>
+        <div class="scoreline"><span>落地完整</span><div class="bar"><span style="width: 90%"></span></div><strong>闭环</strong></div>
+        <div class="scoreline"><span>风险边界</span><div class="bar"><span style="width: 92%"></span></div><strong>清晰</strong></div>
+        <div class="scoreline"><span>表达风险</span><div class="bar"><span style="width: 74%"></span></div><strong>需压缩</strong></div>
+      </div>
+    </section>
+
+    <nav class="navstrip" id="topicNav" aria-label="澄清主题"></nav>
+
+    <main class="workbench">
+      <section class="board" aria-label="概念澄清面板">
+        <div class="pane-head">
+          <div>
+            <div class="smallcap">Concept Board</div>
+            <h2 id="topicHeading">概念澄清</h2>
+          </div>
+          <span class="tag" id="topicTag">主题</span>
+        </div>
+        <div class="definition">
+          <h3 id="topicTitle"></h3>
+          <p id="topicDefinition"></p>
+          <div class="essence" id="topicEssence"></div>
+        </div>
+        <div id="topicBody"></div>
+      </section>
+
+      <aside class="script" aria-label="面试表达">
+        <div class="pane-head">
+          <div>
+            <div class="smallcap">Interview Script</div>
+            <h2 id="scriptHeading">面试表达</h2>
+          </div>
+        </div>
+        <div class="tabs">
+          <button data-mode="brief" class="active">30 秒</button>
+          <button data-mode="deep">2 分钟</button>
+          <button data-mode="attack">追问防线</button>
+        </div>
+        <article class="talk-card">
+          <h3>建议答法</h3>
+          <pre id="answerText"></pre>
+        </article>
+        <article class="talk-card">
+          <h3>面试官听到的能力信号</h3>
+          <div class="chip-row" id="signalList"></div>
+        </article>
+        <article class="talk-card">
+          <h3>需要避开的表达</h3>
+          <ul class="note-list" id="avoidList"></ul>
+        </article>
+      </aside>
+    </main>
+
+    <section class="qa-zone" aria-label="整合素材">
+      <div class="qa-head">
+        <div>
+          <div class="smallcap">Integration Bank</div>
+          <h2>后续可整合到主手册的问答素材</h2>
+        </div>
+        <div class="qa-tools" id="qaFilters"></div>
+      </div>
+      <div class="qa-grid" id="qaGrid"></div>
+    </section>
+  </div>
+
+  <div class="copy-toast" id="toast">已复制</div>
+
+  <script>
+    const topics = [
+      {
+        id: "ai-plus-native",
+        nav: "1 AI+ vs AI Native",
+        tag: "基础概念",
+        title: "AI+ 是能力叠加，AI Native 是生产关系重构",
+        definition: "AI+ 是在既有系统和流程上增加 AI 能力；AI Native 是以 AI / Agent 能力为前提，重新设计业务流程、交付物、人机边界和反馈闭环。",
+        essence: "本质：AI+ 改的是局部效率，AI Native 改的是业务运行方式。",
+        body: {
+          type: "compare",
+          rows: [
+            ["改造对象", "单点功能、页面、问答入口、辅助工具", "业务链路、决策流程、交付物、反馈闭环和治理体系"],
+            ["AI 角色", "助手、插件、推荐器、生成器", "任务执行者、证据组织者、流程编排者、学习闭环参与者"],
+            ["人的角色", "原流程操作者，AI 帮人更快完成局部任务", "目标定义者、边界设定者、风险裁决者、反馈标注者、体系治理者"],
+            ["典型交付", "一段回答、一份摘要、一个推荐结果", "可审计 artifact、结构化决策依据、工具 trace、反馈样本和可迭代知识"],
+            ["判断标准", "有没有用 AI", "核心流程是否因 AI 能力被重构，且是否形成持续学习闭环"]
+          ],
+          headers: ["维度", "AI+", "AI Native"]
+        },
+        scripts: {
+          brief: "AI+ 是在旧流程上加 AI，比如审核后台加问答、摘要或推荐；AI Native 是围绕 Agent 的理解、规划、工具调用、证据组织和反馈学习能力，重构业务流程、交付物、人机边界和数据闭环。放在风控审核里，AI+ 是帮审核员查资料，AI Native 是把风险发现、证据组装、规则对齐、审核研判、案件流转、人工复核和反馈进化重构成可运行体系。",
+          deep: "我会把 AI+ 和 AI Native 区分为两层。AI+ 的出发点是“原流程不变，用 AI 提效”，典型形态是问答助手、摘要工具、生成推荐。AI Native 的出发点是“AI 能理解、规划、调用工具、组织证据和从反馈中学习，所以业务流程本身要重构”。在风控审核里，如果只是给审核员一个 SOP 问答入口，那是 AI+；如果把审核域知识、案件上下文、证据工具、Harness 边界、审核 artifact、人工复核和反馈归因串成闭环，那才是 AI Native。",
+          attack: "被追问时要守住边界：AI Native 不是“全自动”，也不是“模型替代业务系统”。它强调的是核心流程围绕 Agent 能力重构，并且有权限、审计、评测、人工复核和可回滚更新。最短防线是：AI+ 看有没有加 AI，AI Native 看业务流程、交付物和数据闭环有没有被 AI 能力重构。"
+        },
+        signals: ["宏观认知", "概念边界", "业务重构意识", "不是工具崇拜"],
+        avoid: ["把 AI Native 说成“用了大模型”。", "把 AI+ 贬低成没有价值。", "暗示 AI Native 等于无人审核或自动处罚。"]
+      },
+      {
+        id: "human-ai",
+        nav: "2 人机协作",
+        tag: "边界设计",
+        title: "人从操作者变成目标、边界、裁决和治理的负责人",
+        definition: "人机协作不是人被替代，而是把低价值查证、证据聚合和结构化输出交给 Agent，把目标定义、风险裁决和体系治理保留给人。",
+        essence: "本质：Agent 承担执行劳动，人承担责任判断和系统进化方向。",
+        body: {
+          type: "grid",
+          cards: [
+            ["目标定义", "Agent 理解任务并拆解步骤；人定义业务目标、成功标准和风险红线。", "green"],
+            ["上下文组装", "Agent 检索知识、调用工具、聚合证据；人确认关键上下文是否足够。", "blue"],
+            ["研判执行", "Agent 对齐规则、生成建议；人审核高风险、低置信和规则冲突 case。", "amber"],
+            ["交付确认", "Agent 生成 artifact；人对高影响动作做最终裁决。", "red"],
+            ["体系进化", "Agent 生成候选知识和候选策略；人审核候选更新并决定灰度发布。", "green"],
+            ["输入输出", "人的输入是目标、约束、复核意见和纠错原因；输出是最终裁决、处置动作、反馈标注和边界调整。", "blue"]
+          ]
+        },
+        scripts: {
+          brief: "我不会把 Agent 设计成替代审核员。更合理的人机协作是：Agent 负责证据收集、规则对齐、初步研判和结构化 artifact；人负责目标设定、风险红线、高风险裁决、异常纠偏和体系治理。人的输入是审核目标、业务约束、复核意见和纠错原因；人的输出是最终裁决、处置动作、反馈标注、知识更新审核和边界调整。",
+          deep: "在 AI Native 风控审核里，人机协作的重点不是“人点不点确认按钮”，而是人的工作重心变化。过去人要查系统、翻规则、找案例、拼证据；Agent 可以承担这些执行劳动，并输出证据链、规则依据、建议动作、置信度和待确认项。但高风险、低置信、规则冲突和高影响处置仍要人裁决。更长期看，人还要把复核、质检、申诉和新风险样本转化为反馈信号，参与知识、工具、Harness 和评测体系的更新治理。",
+          attack: "如果面试官问“那人是不是没用了”，回答要明确：不是。AI Native 下人的价值更集中在目标、价值判断、风险责任和体系治理。Agent 可以建议，但不能承担高影响业务责任；Agent 可以生成候选更新，但不能无约束发布。"
+        },
+        signals: ["HITL 理解", "责任边界", "高风险场景意识", "治理能力"],
+        avoid: ["说模型替代审核员。", "把人工复核简化成形式化点击确认。", "只讲提效，不讲责任边界。"]
+      },
+      {
+        id: "target-state",
+        nav: "3 领域终态",
+        tag: "终局图景",
+        title: "风控审核 AI Native 的终态是一套可控的智能审核操作系统",
+        definition: "终态不是全自动处罚用户，而是让 Agent 成为风控审核域里的证据组织层、研判协同层和反馈进化层。",
+        essence: "本质：上游尊重实时规则引擎，下游服务人工裁决和体系迭代。",
+        body: {
+          type: "flow",
+          nodes: [
+            ["风险事件进入", "规则命中、模型预警、用户行为异常或人工线索触发审核。"],
+            ["上下文和证据快照", "系统组装用户行为、日志、设备/IP、历史处罚、相似案例和规则命中原因。"],
+            ["Agent 研判", "Agent 在知识和 Harness 约束下调用工具、聚合证据、对齐规则。"],
+            ["审核 artifact", "输出风险类型、证据链、规则依据、建议动作、置信度和待确认项。"],
+            ["人工裁决", "高风险、低置信、规则冲突和高影响动作由人复核。"],
+            ["受控进化", "复核、质检、申诉和新风险样本进入归因、灰度、回滚和评测更新。"]
+          ]
+        },
+        scripts: {
+          brief: "我理解的风控审核 AI Native 终态，不是模型自动处罚用户，而是一套可控的智能审核操作系统。上游实时规则引擎仍然处理明确、稳定、高性能的强规则；Agent 负责复杂案件里的证据组织、语义理解、案例类比、规则解释和审核建议；人负责高风险裁决；反馈再进入受控进化。",
+          deep: "终态可以拆成三层：实时决策层、案件审核层、反馈进化层。实时决策层由规则引擎、特征服务和模型打分承担第一道防线；案件审核层由 Agent 组装上下文、调用证据工具、对齐规则并生成 artifact；反馈进化层把人工复核、质检、申诉和新风险样本归因到知识、上下文、工具、Harness、流程或评测问题。这样 Agent 不是替代风控系统，而是增强解释、复核和体系进化能力。",
+          attack: "如果被问“这是不是离真实生产太远”，要回答：生产级边界必须保守。强规则和实时拦截仍然在规则引擎；Agent 更适合复杂边界判断、证据解释、复核辅助和策略反哺。它的终态不是单个聊天窗口，而是被治理约束的审核操作系统。"
+        },
+        signals: ["终局思维", "生产边界", "规则引擎协同", "领域架构能力"],
+        avoid: ["说 Agent 替代规则引擎。", "把终态讲成一个聊天机器人。", "忽略实时决策层和审核层的边界。"]
+      },
+      {
+        id: "artifact",
+        nav: "4 Artifact 与交付",
+        tag: "交付物",
+        title: "AI 的交付物不是一句回答，而是可审计、可复核、可反馈的 artifact",
+        definition: "Artifact 是 Agent 完成任务后交付给人和系统的结构化工作产物，既服务人的判断，也服务系统的追踪、评测和迭代。",
+        essence: "本质：把模型输出从“文本结果”升级为“可进入业务流程的工作对象”。",
+        body: {
+          type: "grid",
+          cards: [
+            ["风险类型", "当前案件属于哪类风险，和业务风险 taxonomy 对齐。", "green"],
+            ["证据链", "引用哪些日志、规则、行为、历史案例和工具结果。", "blue"],
+            ["规则依据", "命中的规则、SOP、审核标准和适用范围。", "amber"],
+            ["建议动作", "放行、拦截、降权、补证、升级复核或继续观察。", "red"],
+            ["置信度与待确认项", "说明把握程度、缺失证据、规则冲突和需人工确认点。", "amber"],
+            ["Trace 与反馈入口", "记录工具路径、参数和中间结果，支持采纳、修正、驳回和归因。", "blue"]
+          ]
+        },
+        scripts: {
+          brief: "我更关注 Agent 交付的不是一句“建议拦截”，而是一份可审计 artifact：风险类型、证据链、规则依据、建议动作、置信度、待人工确认项和执行 trace。人可以基于这份 artifact 做最终裁决，系统可以基于 trace 和反馈做评测、归因和后续迭代。",
+          deep: "Artifact 的意义是把 AI 输出变成业务流程中的可操作对象，而不是停留在自然语言回答。在风控审核里，一个合格 artifact 要能回答：这个案件是什么风险，依据是什么，证据来自哪里，命中了哪些规则，建议动作是什么，模型哪里不确定，哪些必须转人工，Agent 调了哪些工具。交互上它应该像审核工作台：人可以展开证据、追问来源、修改建议、采纳或驳回，并标注原因。",
+          attack: "如果被问“为什么不直接输出结论”，回答是：风控审核是高风险场景，结论必须可解释、可复核、可追责。没有 artifact，后续无法审计、无法评测、无法归因，也无法形成反馈飞轮。"
+        },
+        signals: ["产品化交付意识", "审计意识", "Trace/Eval 关联", "可落地"],
+        avoid: ["把 artifact 说成漂亮报告。", "只讲自然语言总结。", "没有反馈入口和 trace。"]
+      },
+      {
+        id: "flywheel",
+        nav: "5 数据飞轮",
+        tag: "持续进化",
+        title: "数据飞轮不是无脑喂数据，而是把执行、复核和失败转成可治理资产",
+        definition: "数据飞轮是从 Agent 执行、artifact、trace、人工反馈和失败样本中持续生成可评审、可验证、可回滚的系统改进。",
+        essence: "本质：反馈先归因，再更新；候选先审核，再发布。",
+        body: {
+          type: "flow",
+          nodes: [
+            ["Agent 执行", "完成一次审核任务，产生 artifact、工具调用记录和中间判断。"],
+            ["人工反馈", "复核、质检、申诉、策略复盘和新风险样本形成结构化反馈。"],
+            ["问题归因", "归因到知识、上下文、工具、Harness、流程或评测缺口。"],
+            ["候选更新", "生成候选知识、候选策略、工具能力、Prompt / Workflow 或边界调整。"],
+            ["治理发布", "经过人工审核、冲突检测、灰度验证、效果监控和版本回滚。"],
+            ["能力提升", "更新知识库、工具、Harness 和评测集，进入下一轮审核。"]
+          ]
+        },
+        scripts: {
+          brief: "数据飞轮不是把线上数据直接喂回模型，而是 Agent 每次执行产生 artifact 和 trace，人工复核、质检、申诉形成结构化反馈，再归因到知识、上下文、工具、Harness、流程或评测缺口，生成候选更新，经人工审核、灰度验证和可回滚发布后，反哺下一轮审核。",
+          deep: "我会把数据飞轮设计成治理闭环：第一步记录 Agent 的任务、路径、工具参数、证据来源和最终 artifact；第二步采集人工复核、质检、申诉和误判漏判反馈；第三步做归因，判断问题发生在检索、工具、规则理解、上下文缺失、Harness 边界还是评测覆盖；第四步生成候选更新；第五步通过人工审核、灰度、监控和回滚发布。这样才能避免反馈污染正式知识体系。",
+          attack: "如果面试官质疑“自进化会不会污染系统”，回答是：不会直接写正式体系。越靠近自治，越要保守。Agent 可以生成候选，但高影响规则、处置边界和工具权限必须人工审核，所有版本可追溯、可评估、可回滚。"
+        },
+        signals: ["闭环落地", "评测驱动", "风险治理", "长期价值"],
+        avoid: ["说 Agent 自动学习线上反馈并更新规则。", "只收集对错标签，不做归因。", "没有灰度、监控和回滚。"]
+      },
+      {
+        id: "capability",
+        nav: "6 能力证明",
+        tag: "面试信号",
+        title: "面试官想看的不是概念熟悉度，而是业务、工程和治理三层能力",
+        definition: "能力证明要回答：你是否理解 AI Native 的方向，是否能把系统做出来，是否知道如何上线、评估和治理风险。",
+        essence: "本质：从“我会用 AI”升级为“我能把 AI 能力落到可上线业务系统”。",
+        body: {
+          type: "grid",
+          cards: [
+            ["宏观认知", "能区分 AI+ 与 AI Native，知道 AI 改的是业务形态而不是页面功能。", "green"],
+            ["领域建模", "能把风控审核拆成五条主线和三大支柱，而不是堆技术名词。", "blue"],
+            ["工程落地", "能讲知识治理、上下文、Tool Calling、Workflow、Harness、Trace、Eval。", "amber"],
+            ["风险治理", "知道哪些不能自动化，如何做权限、审计、人工复核、灰度和回滚。", "red"],
+            ["价值证明", "能把技术能力转成短期提效、中期提质、长期进化指标。", "green"],
+            ["个人可信度", "能讲清自己的贡献边界，不虚构全量 ownership。", "blue"]
+          ]
+        },
+        scripts: {
+          brief: "面试官不是只看我会不会说 RAG、Tool Calling 或 Agent，而是看我是否有三层能力：宏观上理解 AI Native 是业务运行方式重构；工程上能把知识、上下文、工具、Workflow、Harness、Trace、Eval 串成可运行闭环；治理上知道高风险场景必须有人工复核、审计、灰度、回滚和指标验证。",
+          deep: "我会把能力表达分成五类。第一是认知领先，能从 AI+ 讲到 AI Native 终态；第二是领域建模，能从风控审核生命周期拆业务主线；第三是工程落地，能说明 Spring Boot / Spring AI、RAG、Tool Calling、MCP、Workflow、Trace、Eval 如何支撑真实业务；第四是风险治理，知道 Agent 的权限边界和人工复核边界；第五是价值证明，能用效率、质量、体系进化指标证明项目价值。",
+          attack: "如果面试官问“这些你真的做过多少”，回答要诚实按三层切：方向和架构我负责或参与什么，关键链路我实现或验证了什么，闭环和评测我如何证明效果。不要把方法论样板说成完整线上生产系统。"
+        },
+        signals: ["认知领先", "完整落地", "真实边界", "面试可信度"],
+        avoid: ["堆框架名。", "没有真实数据却说具体提升百分比。", "把方法论样板包装成完整生产系统。"]
+      },
+      {
+        id: "narrative",
+        nav: "7 叙事方法",
+        tag: "表达结构",
+        title: "先宏观定义 why / what，再细化 how / proof",
+        definition: "好的面试叙事不是罗列功能，而是从出发点、拆解方法、成功案例和价值结果组织信息。",
+        essence: "本质：先让面试官相信你看对了问题，再证明你能把系统做出来。",
+        body: {
+          type: "flow",
+          nodes: [
+            ["出发点", "传统风控审核的核心矛盾不是单点效率，而是知识、流程、工具、权限和反馈割裂。"],
+            ["怎么拆", "按五条主线拆业务域，按三大支柱搭能力底座，再用单次执行和长期进化闭环落地。"],
+            ["成功案例", "用一次高风险案件审核说明 Agent 如何组装上下文、调用工具、对齐规则、输出 artifact 并转人工复核。"],
+            ["价值结果", "短期提效，中期提质，长期形成数据飞轮和体系进化能力。"],
+            ["宏观到细节", "先讲 why / what，再讲 RAG、Tool、Workflow、Harness、Eval 等 how。"],
+            ["岗位差异化", "后端讲工程集成，平台讲 Orchestrator 和治理，产品讲终态和 artifact，风控讲证据链和审计。"]
+          ]
+        },
+        scripts: {
+          brief: "我的叙事会按“出发点、怎么拆、成功案例、价值结果”讲。先说明传统风控审核的核心矛盾是割裂，不是单点慢；再用五条主线和三大支柱拆领域；然后用一次案件审核讲 Agent 如何输出 artifact；最后用短期提效、中期提质、长期进化证明价值。",
+          deep: "我会先讲宏观 why / what：为什么不是做审核问答助手，而是风控审核业务域 AI Native 化；它的目标态是什么。再讲 how：审核域知识治理、案件上下文、证据工具、Agent Workflow、Harness、Trace、Eval 和反馈归因如何串起来。最后讲 proof：用 artifact、trace、评测指标、人工复核、灰度和回滚说明这套系统可上线、可治理、可迭代。",
+          attack: "如果面试官来自不同岗位，要调整重点。Java 后端岗位强调 Spring Boot / Spring AI、MCP、权限审计和业务系统集成；Agent 平台岗位强调 Orchestrator、工具注册、状态、Harness 和评测；产品或方案岗位强调 AI Native 终态、人机边界、artifact 和数据飞轮；风控安全岗位强调规则引擎关系、证据链、误判漏判、申诉和审计。"
+        },
+        signals: ["结构化表达", "岗位适配", "业务到技术映射", "结果导向"],
+        avoid: ["一上来讲技术栈。", "不同岗位都用同一套话术。", "只有宏观口号，没有案例和指标。"]
+      }
+    ];
+
+    const qaItems = [
+      ["基础概念", "一句话区分 AI+ 和 AI Native", "AI+ 是在旧流程上叠加 AI 能力；AI Native 是围绕 AI / Agent 能力重构业务流程、交付物、人机边界和反馈闭环。"],
+      ["基础概念", "AI Native 的本质是什么？", "本质不是用了大模型，而是业务运行方式被模型的理解、规划、工具调用、证据组织和反馈学习能力重新塑造。"],
+      ["人机协作", "AI Native 里人还做什么？", "人负责目标定义、风险红线、高风险裁决、异常纠偏、候选更新审核和体系治理。Agent 负责证据收集、规则对齐、初步研判和结构化交付。"],
+      ["人机协作", "人的输入输出是什么？", "人的输入是审核目标、业务约束、复核意见和纠错原因；人的输出是最终裁决、处置动作、反馈标注、知识更新审核和边界调整。"],
+      ["领域终态", "风控审核 AI Native 的终态是什么？", "不是模型自动处罚用户，而是一套可控智能审核操作系统：上游尊重规则引擎，下游服务人工裁决和体系迭代。"],
+      ["交付物", "Artifact 是什么？", "Artifact 是 Agent 交付给人和系统的结构化工作产物，包括风险类型、证据链、规则依据、建议动作、置信度、待确认项、trace 和反馈入口。"],
+      ["数据飞轮", "数据飞轮怎么形成？", "Agent 执行产生 artifact 和 trace，人工复核、质检、申诉形成反馈，反馈归因后生成候选更新，经人工审核、灰度验证和回滚机制反哺知识、工具、Harness 和评测集。"],
+      ["能力证明", "面试官想看什么能力？", "看你是否有宏观认知、领域建模、工程落地、风险治理、价值证明和真实贡献边界。"],
+      ["叙事方法", "推荐主叙事是什么？", "出发点：体系割裂；怎么拆：五条主线和三大支柱；成功案例：一次案件审核 artifact；价值结果：短期提效、中期提质、长期进化。"],
+      ["岗位差异", "不同岗位怎么讲？", "后端讲工程集成，平台讲 Orchestrator 和治理，产品讲终态和 artifact，风控讲规则引擎、证据链、误判漏判、申诉和审计。"]
+    ];
+
+    let activeTopic = 0;
+    let activeMode = "brief";
+    let activeFilter = "全部";
+
+    const $ = (id) => document.getElementById(id);
+
+    function showToast(text = "已复制") {
+      const toast = $("toast");
+      toast.textContent = text;
+      toast.classList.add("show");
+      window.setTimeout(() => toast.classList.remove("show"), 1400);
+    }
+
+    async function copyText(text, message) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(message);
+      } catch (error) {
+        const area = document.createElement("textarea");
+        area.value = text;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+        showToast(message);
+      }
+    }
+
+    function renderNav() {
+      const nav = $("topicNav");
+      nav.innerHTML = "";
+      topics.forEach((topic, index) => {
+        const btn = document.createElement("button");
+        btn.textContent = topic.nav;
+        btn.className = index === activeTopic ? "active" : "";
+        btn.addEventListener("click", () => {
+          activeTopic = index;
+          render();
+        });
+        nav.appendChild(btn);
+      });
+    }
+
+    function renderBody(topic) {
+      if (topic.body.type === "compare") {
+        const header = topic.body.headers.map(item => `<div class="head">${item}</div>`).join("");
+        const rows = topic.body.rows.map(row => `
+          <div class="label">${row[0]}</div>
+          <div>${row[1]}</div>
+          <div>${row[2]}</div>
+        `).join("");
+        return `<div class="compare">${header}${rows}</div>`;
+      }
+      if (topic.body.type === "flow") {
+        return `<div class="flow">${topic.body.nodes.map((node, index) => `
+          <div class="flow-node">
+            <div class="num">${index + 1}</div>
+            <div><b>${node[0]}</b><span>${node[1]}</span></div>
+          </div>
+        `).join("")}</div>`;
+      }
+      return `<div class="grid-3">${topic.body.cards.map(card => `
+        <div class="cell ${card[2] || ""}">
+          <h4>${card[0]}</h4>
+          <p>${card[1]}</p>
+        </div>
+      `).join("")}</div>`;
+    }
+
+    function renderTopic() {
+      const topic = topics[activeTopic];
+      $("topicHeading").textContent = topic.nav.replace(/^\d+\s/, "");
+      $("scriptHeading").textContent = topic.nav.replace(/^\d+\s/, "") + "答法";
+      $("topicTag").textContent = topic.tag;
+      $("topicTitle").textContent = topic.title;
+      $("topicDefinition").textContent = topic.definition;
+      $("topicEssence").textContent = topic.essence;
+      $("topicBody").innerHTML = renderBody(topic);
+      $("answerText").textContent = topic.scripts[activeMode];
+      $("signalList").innerHTML = topic.signals.map(item => `<span class="chip">${item}</span>`).join("");
+      $("avoidList").innerHTML = topic.avoid.map(item => `<li>${item}</li>`).join("");
+      document.querySelectorAll(".tabs button").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.mode === activeMode);
+      });
+    }
+
+    function renderQaFilters() {
+      const filters = ["全部", ...Array.from(new Set(qaItems.map(item => item[0])))];
+      $("qaFilters").innerHTML = filters.map(item => `<button class="${item === activeFilter ? "active" : ""}" data-filter="${item}">${item}</button>`).join("");
+      $("qaFilters").querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          activeFilter = btn.dataset.filter;
+          renderQaFilters();
+          renderQa();
+        });
+      });
+    }
+
+    function renderQa() {
+      const list = activeFilter === "全部" ? qaItems : qaItems.filter(item => item[0] === activeFilter);
+      $("qaGrid").innerHTML = list.map((item, index) => `
+        <details ${index === 0 ? "open" : ""}>
+          <summary>${item[1]}<span>${item[0]}</span></summary>
+          <p>${item[2]}</p>
+        </details>
+      `).join("");
+    }
+
+    function trainingPrompt() {
+      const topic = topics[activeTopic];
+      return [
+        "请扮演严苛但建设性的 AI Native 风控审核 Agent 项目面试官。",
+        "当前训练主题：" + topic.nav + " / " + topic.tag,
+        "我的目标答法：",
+        topic.scripts[activeMode],
+        "",
+        "请你按以下方式训练我：",
+        "1. 先判断这段回答是否讲清了定义、澄清和本质。",
+        "2. 针对最容易被追问的 3 个点继续追问。",
+        "3. 如果我把 AI Native 说成普通 AI+、把 Agent 说成全自动处罚、或者跳过人机边界和治理，请立刻纠偏。",
+        "4. 最后给我一个更适合目标岗位的 30 秒版本。"
+      ].join("\n");
+    }
+
+    function exportJson() {
+      return JSON.stringify({
+        title: "AI Native 风控审核 Agent 概念澄清补充",
+        activeTopic: topics[activeTopic].nav,
+        activeMode,
+        topic: topics[activeTopic],
+        qa: qaItems.map(([category, question, answer]) => ({ category, question, answer }))
+      }, null, 2);
+    }
+
+    function render() {
+      renderNav();
+      renderTopic();
+      renderQaFilters();
+      renderQa();
+    }
+
+    document.querySelectorAll(".tabs button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        activeMode = btn.dataset.mode;
+        renderTopic();
+      });
+    });
+    $("copyCurrent").addEventListener("click", () => copyText(topics[activeTopic].scripts[activeMode], "当前答法已复制"));
+    $("copyPrompt").addEventListener("click", () => copyText(trainingPrompt(), "训练 Prompt 已复制"));
+    $("copyJson").addEventListener("click", () => copyText(exportJson(), "JSON 已复制"));
+
+    render();
+  </script>
+</body>
+</html>

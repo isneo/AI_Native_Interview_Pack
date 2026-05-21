@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Native 风控审核 Agent · 面试训练手册</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Noto+Serif+SC:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #181612;
+    --ink-soft: #4a4540;
+    --ink-mute: #8a847d;
+    --paper: #f5f1ea;
+    --paper-warm: #ebe5db;
+    --paper-deep: #e0d8c9;
+    --rule: #c9bfae;
+    --rule-soft: #d8d0c0;
+    --accent: #8b2a1f;
+    --accent-soft: #c45c4b;
+    --gold: #b08840;
+    --olive: #5a6a3e;
+    --teal: #2d5a5a;
+    --plum: #5a3a5a;
+    --indigo: #2d3a5a;
+    --shadow: 0 1px 0 rgba(24,22,18,0.04), 0 8px 24px -8px rgba(24,22,18,0.12);
+    --shadow-deep: 0 2px 0 rgba(24,22,18,0.06), 0 24px 48px -12px rgba(24,22,18,0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Noto Serif SC', 'Fraunces', Georgia, serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(176,136,64,0.04) 0%, transparent 35%),
+      radial-gradient(circle at 88% 92%, rgba(139,42,31,0.03) 0%, transparent 40%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.09 0 0 0 0 0.08 0 0 0 0 0.07 0 0 0 0.035 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /* ============ 顶部封面区 ============ */
+  .cover {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 80px 60px 60px;
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: 60px; left: 60px;
+    width: 48px; height: 1px;
+    background: var(--accent);
+  }
+  .cover-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-top: 12px;
+    margin-bottom: 24px;
+  }
+  .cover-title {
+    font-family: 'Fraunces', 'Noto Serif SC', serif;
+    font-size: clamp(40px, 5.5vw, 78px);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    font-weight: 400;
+    margin-bottom: 18px;
+  }
+  .cover-title em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .cover-sub {
+    font-size: 17px;
+    color: var(--ink-soft);
+    max-width: 720px;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding-top: 28px;
+    border-top: 1px dashed var(--rule);
+  }
+  .cover-meta span strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* ============ 叙事框架导览 ============ */
+  .compass {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 48px 60px 24px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  .compass-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    padding-top: 8px;
+  }
+  .compass-label::before {
+    content: '◆';
+    color: var(--accent);
+    margin-right: 8px;
+  }
+  .compass-flow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
+  }
+  .compass-step {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+  }
+  .compass-step-content {
+    flex: 1;
+    padding: 8px 4px;
+  }
+  .compass-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+  .compass-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-top: 2px;
+  }
+  .compass-hint {
+    font-size: 11px;
+    color: var(--ink-mute);
+    margin-top: 2px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .compass-arrow {
+    color: var(--rule);
+    margin: 0 12px;
+    font-family: 'Fraunces', serif;
+  }
+
+  /* ============ 章节主体 ============ */
+  .chapter {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 56px 60px;
+    border-top: 1px solid var(--rule);
+  }
+  .chapter:first-of-type {
+    border-top: none;
+  }
+
+  .chapter-head {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 48px;
+    margin-bottom: 40px;
+    align-items: end;
+  }
+  .chapter-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .chapter-num {
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    color: var(--ink-mute);
+    letter-spacing: 0.15em;
+    font-style: italic;
+    margin-top: 6px;
+  }
+  .chapter-title {
+    font-family: 'Fraunces', 'Noto Serif SC', serif;
+    font-size: clamp(32px, 3.4vw, 46px);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    font-weight: 400;
+  }
+  .chapter-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .chapter-lede {
+    font-size: 16px;
+    color: var(--ink-soft);
+    margin-top: 14px;
+    max-width: 820px;
+    line-height: 1.65;
+  }
+
+  /* ============ 左右分栏主体 ============ */
+  .split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 48px;
+    align-items: start;
+  }
+
+  /* —— 左侧：图、表、卡片 —— */
+  .visual-pane {
+    position: sticky;
+    top: 24px;
+  }
+  .visual-frame {
+    background: #fdfaf3;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 28px;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+  .visual-frame::before {
+    content: 'FIG. ' attr(data-fig);
+    position: absolute;
+    top: -10px;
+    left: 24px;
+    background: var(--paper);
+    padding: 0 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--ink-mute);
+  }
+  .visual-frame svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .visual-caption {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--rule);
+    font-size: 13px;
+    color: var(--ink-mute);
+    font-style: italic;
+    line-height: 1.55;
+  }
+
+  /* —— 右侧：口播+亮点+误区 —— */
+  .speech-block {
+    background: #fdfaf3;
+    border-left: 3px solid var(--accent);
+    padding: 22px 26px;
+    margin-bottom: 22px;
+    position: relative;
+  }
+  .speech-block::before {
+    content: '口';
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    font-family: 'Noto Serif SC', serif;
+  }
+  .block-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .speech-content {
+    font-size: 15px;
+    line-height: 1.85;
+    color: var(--ink);
+  }
+  .speech-content strong {
+    background: linear-gradient(transparent 62%, rgba(176,136,64,0.28) 62%);
+    font-weight: 500;
+    padding: 0 2px;
+  }
+  .speech-content .pause {
+    color: var(--accent-soft);
+    font-style: italic;
+    margin: 0 4px;
+    font-family: 'Fraunces', serif;
+  }
+  .speech-meta {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--rule);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-mute);
+    letter-spacing: 0.08em;
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .speech-meta span::before { content: '· '; color: var(--rule); }
+
+  .highlight-block {
+    background: transparent;
+    border: 1px solid var(--rule);
+    padding: 20px 24px;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .highlight-block::before {
+    content: '亮';
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 24px;
+    height: 24px;
+    background: var(--olive);
+    color: #fdfaf3;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+  }
+  .highlight-block .block-label { color: var(--olive); }
+  .highlight-list {
+    list-style: none;
+    padding: 0;
+  }
+  .highlight-list li {
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--rule-soft);
+    font-size: 14px;
+    line-height: 1.65;
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 10px;
+  }
+  .highlight-list li:last-child { border-bottom: none; }
+  .highlight-list li::before {
+    content: '✓';
+    color: var(--olive);
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .highlight-list strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .pitfall-block {
+    background: rgba(139,42,31,0.04);
+    border: 1px solid rgba(139,42,31,0.2);
+    padding: 20px 24px;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .pitfall-block::before {
+    content: '误';
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 24px;
+    height: 24px;
+    background: var(--accent);
+    color: #fdfaf3;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+  }
+  .pitfall-block .block-label { color: var(--accent); }
+  .pitfall-list {
+    list-style: none;
+    padding: 0;
+  }
+  .pitfall-list li {
+    padding: 12px 0;
+    border-bottom: 1px dashed rgba(139,42,31,0.18);
+    font-size: 14px;
+    line-height: 1.65;
+  }
+  .pitfall-list li:last-child { border-bottom: none; }
+  .pitfall-wrong {
+    color: var(--accent);
+    text-decoration: line-through;
+    text-decoration-color: rgba(139,42,31,0.45);
+    margin-bottom: 4px;
+    display: block;
+  }
+  .pitfall-right {
+    color: var(--ink);
+    display: block;
+    padding-left: 14px;
+    border-left: 2px solid var(--olive);
+  }
+  .pitfall-right::before {
+    content: '→ ';
+    color: var(--olive);
+    font-weight: 600;
+  }
+
+  /* ============ 底部问答区 ============ */
+  .qa-section {
+    background: var(--paper-warm);
+    border-top: 2px solid var(--ink);
+    padding: 80px 0 100px;
+    position: relative;
+  }
+  .qa-section::before {
+    content: '';
+    position: absolute;
+    top: -2px; left: 50%;
+    transform: translateX(-50%);
+    width: 80px; height: 2px;
+    background: var(--accent);
+  }
+  .qa-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 60px;
+  }
+  .qa-header {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 48px;
+    align-items: end;
+    margin-bottom: 56px;
+  }
+  .qa-title {
+    font-family: 'Fraunces', 'Noto Serif SC', serif;
+    font-size: clamp(40px, 4.5vw, 60px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+  }
+  .qa-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .qa-lede {
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin-top: 12px;
+    max-width: 700px;
+  }
+
+  .qa-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+  }
+  .qa-card {
+    background: #fdfaf3;
+    border: 1px solid var(--rule);
+    padding: 28px 30px;
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .qa-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-deep);
+  }
+  .qa-difficulty {
+    position: absolute;
+    top: 0; right: 0;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    padding: 4px 10px;
+    text-transform: uppercase;
+  }
+  .qa-difficulty.hard { background: var(--accent); }
+  .qa-difficulty.trap { background: var(--plum); }
+  .qa-num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-mute);
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .qa-q {
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .qa-intent {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-mute);
+    letter-spacing: 0.05em;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed var(--rule);
+  }
+  .qa-intent strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .qa-a {
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--ink-soft);
+  }
+  .qa-a strong { color: var(--ink); font-weight: 500; }
+  .qa-a em {
+    font-style: italic;
+    color: var(--accent);
+    background: linear-gradient(transparent 62%, rgba(176,136,64,0.22) 62%);
+    padding: 0 2px;
+  }
+  .qa-tip {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--rule);
+    font-size: 12px;
+    color: var(--olive);
+    font-style: italic;
+  }
+  .qa-tip::before { content: '✦ '; }
+
+  /* ============ 底注 ============ */
+  .colophon {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 60px 60px 80px;
+    text-align: center;
+    border-top: 1px solid var(--rule);
+  }
+  .colophon-mark {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 26px;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .colophon-text {
+    font-size: 13px;
+    color: var(--ink-mute);
+    max-width: 580px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+  .colophon-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--ink-mute);
+    margin-top: 24px;
+    text-transform: uppercase;
+  }
+
+  /* —— SVG 通用样式 —— */
+  .svg-stroke { stroke: var(--ink); fill: none; stroke-width: 1; }
+  .svg-stroke-soft { stroke: var(--rule); fill: none; stroke-width: 1; }
+  .svg-fill-paper { fill: #fdfaf3; }
+  .svg-fill-warm { fill: var(--paper-warm); }
+  .svg-fill-accent { fill: var(--accent); }
+  .svg-text {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 13px;
+    fill: var(--ink);
+  }
+  .svg-text-mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    fill: var(--ink-mute);
+    letter-spacing: 0.08em;
+  }
+  .svg-text-italic {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    fill: var(--accent);
+  }
+
+  @media (max-width: 1024px) {
+    .compass, .chapter-head, .qa-header { grid-template-columns: 1fr; gap: 16px; }
+    .split { grid-template-columns: 1fr; gap: 32px; }
+    .visual-pane { position: static; }
+    .qa-grid { grid-template-columns: 1fr; }
+    .cover, .chapter, .qa-inner, .colophon { padding-left: 32px; padding-right: 32px; }
+  }
+
+  /* —— 打印优化 —— */
+  @media print {
+    body { background: white; }
+    .visual-pane { position: static; }
+    .chapter { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ 封面 ============ -->
+<section class="cover">
+  <div class="cover-eyebrow">Interview Training Manual / V1.0</div>
+  <h1 class="cover-title">以终为始 ——<br>风控审核领域的 <em>AI Native</em> 操盘叙事</h1>
+  <p class="cover-sub">
+    这不是一本"讲什么"的稿子，而是一本"怎么讲"的训练手册。<br>
+    左侧是图，是骨架，是面试官记得住的画面；右侧是话，是肉，是你需要练到下意识脱口而出的口播。
+  </p>
+  <div class="cover-meta">
+    <span>叙事终点 / <strong>三者融合</strong></span>
+    <span>适用场景 / <strong>技术面 · 终面</strong></span>
+    <span>核心框架 / <strong>5 主线 × 3 支柱</strong></span>
+    <span>母图记忆 / <strong>白板可手绘</strong></span>
+  </div>
+</section>
+
+<!-- ============ 叙事框架导览 ============ -->
+<div class="compass">
+  <div class="compass-label">叙事罗盘</div>
+  <div class="compass-flow">
+    <div class="compass-step">
+      <div class="compass-step-content">
+        <div class="compass-num">01</div>
+        <div class="compass-name">终点</div>
+        <div class="compass-hint">那句话</div>
+      </div>
+      <span class="compass-arrow">→</span>
+    </div>
+    <div class="compass-step">
+      <div class="compass-step-content">
+        <div class="compass-num">02</div>
+        <div class="compass-name">差异</div>
+        <div class="compass-hint">Native vs Assisted</div>
+      </div>
+      <span class="compass-arrow">→</span>
+    </div>
+    <div class="compass-step">
+      <div class="compass-step-content">
+        <div class="compass-num">03</div>
+        <div class="compass-name">母图</div>
+        <div class="compass-hint">5×3 全景</div>
+      </div>
+      <span class="compass-arrow">→</span>
+    </div>
+    <div class="compass-step">
+      <div class="compass-step-content">
+        <div class="compass-num">04</div>
+        <div class="compass-name">飞轮</div>
+        <div class="compass-hint">闭环里程碑</div>
+      </div>
+      <span class="compass-arrow">→</span>
+    </div>
+    <div class="compass-step">
+      <div class="compass-step-content">
+        <div class="compass-num">05</div>
+        <div class="compass-name">操盘</div>
+        <div class="compass-hint">权衡与判断</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 章节 1：终点 ============ -->
+<section class="chapter" id="ch1">
+  <div class="chapter-head">
+    <div>
+      <div class="chapter-tag">Chapter One</div>
+      <div class="chapter-num">i · 终点</div>
+    </div>
+    <div>
+      <h2 class="chapter-title">面试官最该记住的<em>那一句话</em></h2>
+      <p class="chapter-lede">
+        以终为始，先把终点钉死。整场面试，无论被问到哪里，所有回答都要在心里默默回到这句话上。
+        三者融合——业务驱动、技术落地、方法沉淀——不是三件事，是一件事的三个剖面。
+      </p>
+    </div>
+  </div>
+
+  <div class="split">
+    <!-- 左：视觉 -->
+    <div class="visual-pane">
+      <div class="visual-frame" data-fig="01">
+        <svg viewBox="0 0 520 380" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="dots1" width="6" height="6" patternUnits="userSpaceOnUse">
+              <circle cx="1" cy="1" r="0.5" fill="#c9bfae"/>
+            </pattern>
+          </defs>
+
+          <!-- 三圆交叠 -->
+          <circle cx="200" cy="160" r="110" fill="rgba(90,106,62,0.10)" stroke="#5a6a3e" stroke-width="1"/>
+          <circle cx="320" cy="160" r="110" fill="rgba(45,90,90,0.10)" stroke="#2d5a5a" stroke-width="1"/>
+          <circle cx="260" cy="250" r="110" fill="rgba(139,42,31,0.10)" stroke="#8b2a1f" stroke-width="1"/>
+
+          <!-- 三圆标签 -->
+          <text x="120" y="115" class="svg-text" font-weight="500" fill="#5a6a3e">业务驱动</text>
+          <text x="120" y="132" class="svg-text-mono">WHY · 北极星</text>
+
+          <text x="335" y="115" class="svg-text" font-weight="500" fill="#2d5a5a">技术落地</text>
+          <text x="335" y="132" class="svg-text-mono">HOW · 可工程化</text>
+
+          <text x="185" y="335" class="svg-text" font-weight="500" fill="#8b2a1f">方法沉淀</text>
+          <text x="185" y="352" class="svg-text-mono">WHAT NEXT · 可复制</text>
+
+          <!-- 中心交集 -->
+          <circle cx="260" cy="195" r="36" fill="#fdfaf3" stroke="#181612" stroke-width="1.2"/>
+          <text x="260" y="190" text-anchor="middle" class="svg-text-italic" font-size="14">AI Native</text>
+          <text x="260" y="206" text-anchor="middle" class="svg-text" font-size="11">操盘者</text>
+
+          <!-- 装饰刻度 -->
+          <line x1="40" y1="20" x2="40" y2="360" stroke="#c9bfae" stroke-width="0.5" stroke-dasharray="2,4"/>
+          <text x="48" y="28" class="svg-text-mono">FIG · 01</text>
+          <text x="48" y="356" class="svg-text-mono" font-style="italic">终点 / endpoint</text>
+
+          <!-- 右下角注 -->
+          <text x="480" y="356" text-anchor="end" class="svg-text-mono">三圆交叠 = 唯一终点</text>
+        </svg>
+        <div class="visual-caption">
+          三个圆，任何一个单独都不够。业务驱动单独讲会显得"只懂业务不懂技术"；
+          技术落地单独讲会被定位为"工程实现者"；方法沉淀单独讲会被认为"虚高"。
+          唯有三者交叠的中心，才是面试官眼里的<em>操盘者</em>。
+        </div>
+      </div>
+    </div>
+
+    <!-- 右：口播 -->
+    <div class="speech-pane">
+      <div class="speech-block">
+        <div class="block-label">90 秒开场口播 · 终点版本</div>
+        <div class="speech-content">
+          我整体操盘的是<strong>风控审核领域的 AI Native 化</strong>项目。<span class="pause">/</span>
+          不是给现有系统加 AI 模块，<span class="pause">/</span>
+          而是<strong>重新设计整条业务链路</strong>。<span class="pause">//</span>
+          让 Agent 驱动从风险识别、审核决策、案件流转、知识沉淀到自我进化的<strong>五条主线</strong>。<span class="pause">/</span>
+          支撑五条主线的，是<strong>三大底层支柱</strong>——知识管理、Harness 约束、行为上下文。<span class="pause">//</span>
+          这跟行业里大部分 AI 提效项目<strong>本质不同</strong>：<span class="pause">/</span>
+          他们是"旧流程 + AI 助手"，<span class="pause">/</span>
+          我们是<strong>"Agent 主导的新流程 + 人作为协作者"</strong>。<span class="pause">//</span>
+          每一条主线都有走过的弯路，<span class="pause">/</span>
+          您对哪条感兴趣，我可以深入展开。
+        </div>
+        <div class="speech-meta">
+          <span>定位 30s</span><span>差异化 20s</span><span>架构 25s</span><span>留钩子 15s</span>
+        </div>
+      </div>
+
+      <div class="highlight-block">
+        <div class="block-label">核心亮点</div>
+        <ul class="highlight-list">
+          <li><span><strong>"领域级"而非"模块级"</strong>——开口就把范围抬高到整个审核业务链路，避免被标签化为"做了个知识库"。</span></li>
+          <li><span><strong>"操盘"而非"开发"</strong>——用"重新设计""底层支柱""架构决策"这类词锁定身份。</span></li>
+          <li><span><strong>留钩子</strong>——结尾把展开权交给面试官，体现节奏感。一次倾倒所有信息是新人的做法。</span></li>
+        </ul>
+      </div>
+
+      <div class="pitfall-block">
+        <div class="block-label">常见误区</div>
+        <ul class="pitfall-list">
+          <li>
+            <span class="pitfall-wrong">"我做的项目是风控策略管理，用 RAG + Agent 编排……"</span>
+            <span class="pitfall-right">领域级语言：风控审核领域的 AI Native 化，五条主线 + 三大支柱。</span>
+          </li>
+          <li>
+            <span class="pitfall-wrong">开场直接讲技术选型、LangGraph、ReAct……</span>
+            <span class="pitfall-right">先讲业务价值与差异化定位，技术细节留给追问。</span>
+          </li>
+          <li>
+            <span class="pitfall-wrong">把团队所有功劳揽在自己身上，每个细节都说"我做的"。</span>
+            <span class="pitfall-right">明确区分"我深度参与的主线"与"我整体规划、他人执行的主线"。</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 章节 2：差异 ============ -->
+<section class="chapter" id="ch2">
+  <div class="chapter-head">
+    <div>
+      <div class="chapter-tag">Chapter Two</div>
+      <div class="chapter-num">ii · 差异</div>
+    </div>
+    <div>
+      <h2 class="chapter-title">AI Native 与 AI Assisted 的<em>分水岭</em></h2>
+      <p class="chapter-lede">
+        这是整场面试最容易被低估的一节。99% 的同行都在做 AI Assisted——把 AI 塞进旧流程当助手。
+        AI Native 的本质是<em>生产关系的变化</em>：谁发起决策、谁编排流程、谁审核谁。
+      </p>
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="visual-pane">
+      <div class="visual-frame" data-fig="02">
+        <svg viewBox="0 0 520 420" xmlns="http://www.w3.org/2000/svg">
+          <!-- 上半：AI Assisted -->
+          <text x="30" y="32" class="svg-text-mono">A · AI ASSISTED · 旧范式</text>
+          <line x1="30" y1="40" x2="490" y2="40" stroke="#c9bfae" stroke-width="0.5"/>
+
+          <g transform="translate(30,60)">
+            <rect x="0" y="0" width="80" height="50" fill="#fdfaf3" stroke="#181612" stroke-width="1"/>
+            <text x="40" y="22" text-anchor="middle" class="svg-text" font-size="11">人</text>
+            <text x="40" y="36" text-anchor="middle" class="svg-text-mono">写规则</text>
+
+            <line x1="80" y1="25" x2="120" y2="25" stroke="#181612" stroke-width="1" marker-end="url(#a1)"/>
+
+            <rect x="120" y="0" width="80" height="50" fill="#fdfaf3" stroke="#181612" stroke-width="1"/>
+            <text x="160" y="22" text-anchor="middle" class="svg-text" font-size="11">机器</text>
+            <text x="160" y="36" text-anchor="middle" class="svg-text-mono">执行</text>
+
+            <line x1="200" y1="25" x2="240" y2="25" stroke="#181612" stroke-width="1" marker-end="url(#a1)"/>
+
+            <rect x="240" y="0" width="80" height="50" fill="#fdfaf3" stroke="#181612" stroke-width="1"/>
+            <text x="280" y="22" text-anchor="middle" class="svg-text" font-size="11">出问题</text>
+            <text x="280" y="36" text-anchor="middle" class="svg-text-mono">bad case</text>
+
+            <line x1="320" y1="25" x2="360" y2="25" stroke="#181612" stroke-width="1" marker-end="url(#a1)"/>
+
+            <rect x="360" y="0" width="80" height="50" fill="#fdfaf3" stroke="#181612" stroke-width="1"/>
+            <text x="400" y="22" text-anchor="middle" class="svg-text" font-size="11">人</text>
+            <text x="400" y="36" text-anchor="middle" class="svg-text-mono">改规则</text>
+
+            <!-- 回流箭头 -->
+            <path d="M 400,50 Q 400,80 200,80 Q 40,80 40,55" fill="none" stroke="#8a847d" stroke-width="0.8" stroke-dasharray="3,3" marker-end="url(#a1)"/>
+            <text x="220" y="78" text-anchor="middle" class="svg-text-mono" font-style="italic">人是迭代的发起者</text>
+          </g>
+
+          <defs>
+            <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#181612"/>
+            </marker>
+            <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#8b2a1f"/>
+            </marker>
+          </defs>
+
+          <!-- 分隔 -->
+          <line x1="30" y1="180" x2="490" y2="180" stroke="#181612" stroke-width="0.5" stroke-dasharray="6,4"/>
+          <text x="260" y="174" text-anchor="middle" class="svg-text-italic" font-size="13">vs.</text>
+
+          <!-- 下半：AI Native -->
+          <text x="30" y="208" class="svg-text-mono" fill="#8b2a1f">B · AI NATIVE · 新范式</text>
+          <line x1="30" y1="216" x2="490" y2="216" stroke="#8b2a1f" stroke-width="0.5"/>
+
+          <g transform="translate(30,236)">
+            <rect x="0" y="0" width="80" height="50" fill="rgba(139,42,31,0.05)" stroke="#8b2a1f" stroke-width="1"/>
+            <text x="40" y="22" text-anchor="middle" class="svg-text" font-size="11" fill="#8b2a1f">Agent</text>
+            <text x="40" y="36" text-anchor="middle" class="svg-text-mono">提案策略</text>
+
+            <line x1="80" y1="25" x2="120" y2="25" stroke="#8b2a1f" stroke-width="1" marker-end="url(#a2)"/>
+
+            <rect x="120" y="0" width="80" height="50" fill="rgba(139,42,31,0.05)" stroke="#8b2a1f" stroke-width="1"/>
+            <text x="160" y="22" text-anchor="middle" class="svg-text" font-size="11" fill="#8b2a1f">人</text>
+            <text x="160" y="36" text-anchor="middle" class="svg-text-mono">审核策略</text>
+
+            <line x1="200" y1="25" x2="240" y2="25" stroke="#8b2a1f" stroke-width="1" marker-end="url(#a2)"/>
+
+            <rect x="240" y="0" width="80" height="50" fill="rgba(139,42,31,0.05)" stroke="#8b2a1f" stroke-width="1"/>
+            <text x="280" y="22" text-anchor="middle" class="svg-text" font-size="11" fill="#8b2a1f">Agent</text>
+            <text x="280" y="36" text-anchor="middle" class="svg-text-mono">执行 + 监控</text>
+
+            <line x1="320" y1="25" x2="360" y2="25" stroke="#8b2a1f" stroke-width="1" marker-end="url(#a2)"/>
+
+            <rect x="360" y="0" width="80" height="50" fill="rgba(139,42,31,0.05)" stroke="#8b2a1f" stroke-width="1"/>
+            <text x="400" y="22" text-anchor="middle" class="svg-text" font-size="11" fill="#8b2a1f">Agent</text>
+            <text x="400" y="36" text-anchor="middle" class="svg-text-mono">自动迭代</text>
+
+            <!-- 回流箭头 -->
+            <path d="M 400,50 Q 400,90 200,90 Q 40,90 40,55" fill="none" stroke="#8b2a1f" stroke-width="1" marker-end="url(#a2)"/>
+            <text x="220" y="86" text-anchor="middle" class="svg-text-mono" font-style="italic" fill="#8b2a1f">Agent 是迭代的发起者 / 人是审核者</text>
+          </g>
+
+          <text x="30" y="400" class="svg-text-mono">本质区别 · 生产关系</text>
+          <text x="490" y="400" text-anchor="end" class="svg-text-italic" font-size="11">谁发起 / 谁审核 / 谁演化</text>
+        </svg>
+        <div class="visual-caption">
+          这张对比图建议练到能在白板上 60 秒画出。它的杀伤力来自一个反直觉的洞察——
+          AI Native 不是"AI 做得更多"，而是<em>角色互换</em>：人从执行者变成审核者，Agent 从工具变成发起者。
+        </div>
+      </div>
+    </div>
+
+    <div class="speech-pane">
+      <div class="speech-block">
+        <div class="block-label">差异化口播 · 30 秒杀手锏</div>
+        <div class="speech-content">
+          传统做法是：<strong>人写规则 → 机器执行 → 出问题 → 人改规则</strong>。<span class="pause">/</span>
+          我们做的是：<strong>让规则的生产、合并、迭代本身都由 AI 驱动</strong>。<span class="pause">//</span>
+          审核员从"写规则的人"变成<strong>"审核 AI 生产的规则的人"</strong>——<span class="pause">/</span>
+          这才是 AI Native，<span class="pause">/</span>
+          而不是 AI Assisted。<span class="pause">//</span>
+          换个角度说，<span class="pause">/</span>
+          整个业务链路里，<strong>人的角色从执行者变成协作者和监督者</strong>，<span class="pause">/</span>
+          这是<strong>生产关系层面的变化</strong>。
+        </div>
+        <div class="speech-meta">
+          <span>金句一</span><span>金句二</span><span>用于追问时甩出</span>
+        </div>
+      </div>
+
+      <div class="highlight-block">
+        <div class="block-label">核心亮点</div>
+        <ul class="highlight-list">
+          <li><span><strong>"生产关系层面的变化"</strong>——这句话能立刻让面试官知道你不是在做技术堆砌，而是在做范式转移。</span></li>
+          <li><span><strong>角色互换的具象化</strong>——"从写规则的人变成审核规则的人"，用一个具体角色变化代替抽象概念。</span></li>
+          <li><span><strong>反例锚定</strong>——主动提"AI Assisted"作为对照，让你的定位自动浮现。</span></li>
+        </ul>
+      </div>
+
+      <div class="pitfall-block">
+        <div class="block-label">常见误区</div>
+        <ul class="pitfall-list">
+          <li>
+            <span class="pitfall-wrong">"我们用了 LLM 帮审核员提高效率，让他们少看一些 case。"</span>
+            <span class="pitfall-right">这就是 AI Assisted 的话术。改成"Agent 主导审核决策，人审核 Agent 的决策"。</span>
+          </li>
+          <li>
+            <span class="pitfall-wrong">把 AI Native 等同于"全自动化"或"无人化"。</span>
+            <span class="pitfall-right">AI Native 不是去掉人，而是<em>重排人的角色</em>——人不消失，但人的角色升级。</span>
+          </li>
+          <li>
+            <span class="pitfall-wrong">只用"识别更准、效率更高"这类增量改进描述差异。</span>
+            <span class="pitfall-right">用"谁发起、谁审核、谁迭代"这种结构性变化描述差异。</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 章节 3：母图 ============ -->
+<section class="chapter" id="ch3">
+  <div class="chapter-head">
+    <div>
+      <div class="chapter-tag">Chapter Three</div>
+      <div class="chapter-num">iii · 母图</div>
+    </div>
+    <div>
+      <h2 class="chapter-title">五条主线 × 三大支柱 · <em>能徒手画</em>的母图</h2>
+      <p class="chapter-lede">
+        这张图是整场面试的母图。任何被追问的环节，都可以回到这张图定位。
+        练到闭眼能画的程度——面试时如果有白板，主动起身画一遍，效果胜过所有 PPT。
+      </p>
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="visual-pane">
+      <div class="visual-frame" data-fig="03">
+        <svg viewBox="0 0 540 540" xmlns="http://www.w3.org/2000/svg">
+          <!-- 顶部 -->
+          <rect x="40" y="20" width="460" height="44" fill="rgba(24,22,18,0.04)" stroke="#181612" stroke-width="0.8"/>
+          <text x="270" y="40" text-anchor="middle" class="svg-text" font-size="13" font-weight="500">风控审核领域 AI Native 化</text>
+          <text x="270" y="56" text-anchor="middle" class="svg-text-mono">Agent 驱动整条业务链路 / 人作为协作者与监督者</text>
+
+          <!-- 五条主线标题 -->
+          <text x="270" y="92" text-anchor="middle" class="svg-text-italic" font-size="11">上层 · 五条改造主线 / 业务链路视角</text>
+
+          <!-- 五个主线卡片 -->
+          <g>
+            <rect x="40" y="105" width="86" height="70" fill="#fdfaf3" stroke="#2d3a5a" stroke-width="0.8"/>
+            <text x="83" y="124" text-anchor="middle" class="svg-text-mono" fill="#2d3a5a">主线 1</text>
+            <text x="83" y="144" text-anchor="middle" class="svg-text" font-size="12" font-weight="500">风险识别</text>
+            <text x="83" y="160" text-anchor="middle" class="svg-text-mono">主动发现</text>
+
+            <rect x="134" y="105" width="86" height="70" fill="#fdfaf3" stroke="#2d5a5a" stroke-width="0.8"/>
+            <text x="177" y="124" text-anchor="middle" class="svg-text-mono" fill="#2d5a5a">主线 2</text>
+            <text x="177" y="144" text-anchor="middle" class="svg-text" font-size="12" font-weight="500">审核决策</text>
+            <text x="177" y="160" text-anchor="middle" class="svg-text-mono">Agent 主导</text>
+
+            <rect x="228" y="105" width="86" height="70" fill="#fdfaf3" stroke="#5a6a3e" stroke-width="0.8"/>
+            <text x="271" y="124" text-anchor="middle" class="svg-text-mono" fill="#5a6a3e">主线 3</text>
+            <text x="271" y="144" text-anchor="middle" class="svg-text" font-size="12" font-weight="500">案件流转</text>
+            <text x="271" y="160" text-anchor="middle" class="svg-text-mono">动态编排</text>
+
+            <rect x="322" y="105" width="86" height="70" fill="#fdfaf3" stroke="#b08840" stroke-width="0.8"/>
+            <text x="365" y="124" text-anchor="middle" class="svg-text-mono" fill="#b08840">主线 4</text>
+            <text x="365" y="144" text-anchor="middle" class="svg-text" font-size="12" font-weight="500">知识沉淀</text>
+            <text x="365" y="160" text-anchor="middle" class="svg-text-mono">自动生产</text>
+
+            <rect x="416" y="105" width="86" height="70" fill="#fdfaf3" stroke="#8b2a1f" stroke-width="0.8"/>
+            <text x="459" y="124" text-anchor="middle" class="svg-text-mono" fill="#8b2a1f">主线 5</text>
+            <text x="459" y="144" text-anchor="middle" class="svg-text" font-size="12" font-weight="500">自我进化</text>
+            <text x="459" y="160" text-anchor="middle" class="svg-text-mono">持续演化</text>
+          </g>
+
+          <!-- 主线箭头链 -->
+          <g stroke="#8a847d" stroke-width="0.6" fill="none">
+            <path d="M 126,140 L 134,140" marker-end="url(#a3)"/>
+            <path d="M 220,140 L 228,140" marker-end="url(#a3)"/>
+            <path d="M 314,140 L 322,140" marker-end="url(#a3)"/>
+            <path d="M 408,140 L 416,140" marker-end="url(#a3)"/>
+          </g>
+          <defs>
+            <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#8a847d"/>
+            </marker>
+          </defs>
+
+          <!-- 生命周期注释 -->
+          <text x="270" y="194" text-anchor="middle" class="svg-text-mono" font-style="italic">风险事件完整生命周期：识别 → 决策 → 流转 → 沉淀 → 进化</text>
+
+          <!-- 三大支柱标题 -->
+          <text x="270" y="232" text-anchor="middle" class="svg-text-italic" font-size="11">下层 · 三大底层支柱 / 公共基础能力</text>
+
+          <!-- 三大支柱 -->
+          <g>
+            <rect x="40" y="250" width="146" height="160" fill="rgba(45,58,90,0.05)" stroke="#2d3a5a" stroke-width="0.8"/>
+            <text x="113" y="270" text-anchor="middle" class="svg-text-mono" fill="#2d3a5a">支柱 一</text>
+            <text x="113" y="292" text-anchor="middle" class="svg-text" font-size="13" font-weight="500">AI 原生知识管理</text>
+            <line x1="55" y1="305" x2="171" y2="305" stroke="#c9bfae" stroke-width="0.5" stroke-dasharray="2,3"/>
+            <text x="113" y="324" text-anchor="middle" class="svg-text" font-size="11">策略自动生产</text>
+            <text x="113" y="342" text-anchor="middle" class="svg-text" font-size="11">冲突合并 / 淘汰</text>
+            <text x="113" y="360" text-anchor="middle" class="svg-text" font-size="11">版本化与回溯</text>
+            <text x="113" y="378" text-anchor="middle" class="svg-text" font-size="11">Schema 共创</text>
+            <text x="113" y="400" text-anchor="middle" class="svg-text-mono" font-style="italic">"会自己长大"</text>
+
+            <rect x="194" y="250" width="146" height="160" fill="rgba(45,90,90,0.05)" stroke="#2d5a5a" stroke-width="0.8"/>
+            <text x="267" y="270" text-anchor="middle" class="svg-text-mono" fill="#2d5a5a">支柱 二</text>
+            <text x="267" y="292" text-anchor="middle" class="svg-text" font-size="13" font-weight="500">Harness 约束</text>
+            <line x1="209" y1="305" x2="325" y2="305" stroke="#c9bfae" stroke-width="0.5" stroke-dasharray="2,3"/>
+            <text x="267" y="324" text-anchor="middle" class="svg-text" font-size="11">可调用策略集</text>
+            <text x="267" y="342" text-anchor="middle" class="svg-text" font-size="11">可访问数据域</text>
+            <text x="267" y="360" text-anchor="middle" class="svg-text" font-size="11">人审兜底门限</text>
+            <text x="267" y="378" text-anchor="middle" class="svg-text" font-size="11">合规边界画定</text>
+            <text x="267" y="400" text-anchor="middle" class="svg-text-mono" font-style="italic">"自主 + 合规"</text>
+
+            <rect x="348" y="250" width="146" height="160" fill="rgba(139,42,31,0.05)" stroke="#8b2a1f" stroke-width="0.8"/>
+            <text x="421" y="270" text-anchor="middle" class="svg-text-mono" fill="#8b2a1f">支柱 三</text>
+            <text x="421" y="292" text-anchor="middle" class="svg-text" font-size="13" font-weight="500">行为上下文</text>
+            <line x1="363" y1="305" x2="479" y2="305" stroke="#c9bfae" stroke-width="0.5" stroke-dasharray="2,3"/>
+            <text x="421" y="324" text-anchor="middle" class="svg-text" font-size="11">账号轨迹</text>
+            <text x="421" y="342" text-anchor="middle" class="svg-text" font-size="11">关联图谱</text>
+            <text x="421" y="360" text-anchor="middle" class="svg-text" font-size="11">设备 / IP 指纹</text>
+            <text x="421" y="378" text-anchor="middle" class="svg-text" font-size="11">历史判罚</text>
+            <text x="421" y="400" text-anchor="middle" class="svg-text-mono" font-style="italic">"用户档案"</text>
+          </g>
+
+          <!-- 主线-支柱连接 -->
+          <g stroke="#c9bfae" stroke-width="0.5" stroke-dasharray="1,3" fill="none">
+            <line x1="83" y1="175" x2="83" y2="250"/>
+            <line x1="177" y1="175" x2="177" y2="250"/>
+            <line x1="271" y1="175" x2="271" y2="250"/>
+            <line x1="365" y1="175" x2="365" y2="250"/>
+            <line x1="459" y1="175" x2="459" y2="250"/>
+          </g>
+
+          <!-- 底部设计原则 -->
+          <rect x="40" y="430" width="460" height="80" fill="none" stroke="#c9bfae" stroke-width="0.5" stroke-dasharray="3,3"/>
+          <text x="270" y="450" text-anchor="middle" class="svg-text-mono">设计原则 · DESIGN PRINCIPLES</text>
+          <text x="160" y="476" text-anchor="middle" class="svg-text" font-size="12">主线之间 · <tspan fill="#8b2a1f" font-style="italic">松耦合</tspan></text>
+          <text x="160" y="494" text-anchor="middle" class="svg-text-mono">独立可验证</text>
+          <text x="380" y="476" text-anchor="middle" class="svg-text" font-size="12">支柱之上 · <tspan fill="#8b2a1f" font-style="italic">强复用</tspan></text>
+          <text x="380" y="494" text-anchor="middle" class="svg-text-mono">避免各造轮子</text>
+
+          <text x="40" y="528" class="svg-text-mono">FIG · 03</text>
+          <text x="500" y="528" text-anchor="end" class="svg-text-mono" font-style="italic">5 主线 × 3 支柱 / 母图</text>
+        </svg>
+        <div class="visual-caption">
+          这是母图，你的"白板武器"。讲解顺序：先指上层五个卡片说"业务链路视角"，
+          再指下层三个柱子说"底层能力视角"，最后指底部虚线框说"主线松耦合、支柱强复用"。
+          整套讲解 60 秒以内。
+        </div>
+      </div>
+    </div>
+
+    <div class="speech-pane">
+      <div class="speech-block">
+        <div class="block-label">母图讲解口播 · 60 秒</div>
+        <div class="speech-content">
+          我把项目分成三个视角看。<span class="pause">//</span>
+          <strong>业务链路视角</strong>——<span class="pause">/</span>
+          五条改造主线，覆盖风险事件的完整生命周期：<span class="pause">/</span>
+          从识别、决策、流转、沉淀到进化。<span class="pause">/</span>
+          每条主线都是<strong>Agent 驱动</strong>的，<span class="pause">/</span>
+          而不是给传统流程加 AI。<span class="pause">//</span>
+          <strong>底层能力视角</strong>——<span class="pause">/</span>
+          三大支柱是所有主线共用的基础能力：<span class="pause">/</span>
+          知识管理负责领域知识的生产和演化，<span class="pause">/</span>
+          Harness 负责给 Agent 划定决策边界，<span class="pause">/</span>
+          行为上下文负责为 one-off 调用提供用户档案。<span class="pause">/</span>
+          这三大支柱是<strong>最重要的架构决策</strong>——避免每条主线各造轮子。<span class="pause">//</span>
+          <strong>设计原则</strong>——<span class="pause">/</span>
+          主线之间松耦合、独立可验证；<span class="pause">/</span>
+          支柱层强复用、共享基础设施。<span class="pause">/</span>
+          这让项目既能整体规划，又能分主线突破。
+        </div>
+        <div class="speech-meta">
+          <span>白板手绘版</span><span>母图记忆点</span><span>展开钩子</span>
+        </div>
+      </div>
+
+      <div class="highlight-block">
+        <div class="block-label">核心亮点</div>
+        <ul class="highlight-list">
+          <li><span><strong>三视角分解</strong>——业务链路 / 底层能力 / 设计原则。这是操盘者级别的架构表达方式。</span></li>
+          <li><span><strong>"避免各造轮子"</strong>——这句话能立刻打动技术 VP。它体现了你对工程复用、横向治理的思考。</span></li>
+          <li><span><strong>"独立可验证 + 共享基础设施"</strong>——主线层和支柱层的两条原则，是大项目能稳的关键。</span></li>
+          <li><span><strong>风控特有的"行为上下文"</strong>——区别于"对话历史"，这是风控 Agent 与通用 Agent 的本质差异。</span></li>
+        </ul>
+      </div>
+
+      <div class="pitfall-block">
+        <div class="block-label">常见误区</div>
+        <ul class="pitfall-list">
+          <li>
+            <span class="pitfall-wrong">把架构讲成"流水线四层"：输入 → 规划 → 执行 → 输出。</span>
+            <span class="pitfall-right">这是通用 Agent 模板，没体现风控特色。改用"五主线 + 三支柱"结构。</span>
+          </li>
+          <li>
+            <span class="pitfall-wrong">五条主线平铺直叙，每条都讲得一样深。</span>
+            <span class="pitfall-right">承认深度不一：审核决策 + 知识沉淀已跑通；识别 + 流转灰度中；进化是攻坚方向。</span>
+          </li>
+          <li>
+            <span class="pitfall-wrong">把"行为上下文"等同于"对话历史"或"Memory"。</span>
+            <span class="pitfall-right">明确说：风控 Agent 是 one-off 调用，<em>没有对话</em>。上下文是用户的数据档案。</span>
+          </li>
+          <li>
+            <span class="pitfall-wrong">不解释"Harness"这个词，让面试官以为是沙箱。</span>
+            <span class="pitfall-right">主动定义：Harness 不是沙箱，是 Agent 在风控领域"守规矩"的约束机制。</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 章节 4：飞轮 ============ -->
+<section class="chapter" id="ch4">
+  <div class="chapter-head">
+    <div>
+      <div class="chapter-tag">Chapter Four</div>
+      <div class="chapter-num">iv · 飞轮</div>
+    </div>
+    <div>
+      <h2 class="chapter-title">先建飞轮，再做规模 · <em>闭环里程碑</em></h2>
+      <p class="chapter-lede">
+        进展汇报不要用"功能清单"，要用"飞轮验证度"。
+        面试官在意的不是你做了多少功能，而是你的飞轮跑没跑通——能否自我强化。
+      </p>
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="visual-pane">
+      <div class="visual-frame" data-fig="04">
+        <svg viewBox="0 0 520 480" xmlns="http://www.w3.org/2000/svg">
+          <!-- 中心飞轮 -->
+          <g transform="translate(260,240)">
+            <circle cx="0" cy="0" r="130" fill="none" stroke="#181612" stroke-width="0.5" stroke-dasharray="2,4"/>
+            <circle cx="0" cy="0" r="56" fill="#fdfaf3" stroke="#8b2a1f" stroke-width="1"/>
+            <text x="0" y="-4" text-anchor="middle" class="svg-text-italic" font-size="14">AI Native</text>
+            <text x="0" y="16" text-anchor="middle" class="svg-text" font-size="12">知识飞轮</text>
+          </g>
+
+          <!-- 四个节点 -->
+          <g>
+            <!-- 上 -->
+            <circle cx="260" cy="80" r="44" fill="#fdfaf3" stroke="#5a6a3e" stroke-width="1"/>
+            <text x="260" y="74" text-anchor="middle" class="svg-text" font-size="12" font-weight="500">提案</text>
+            <text x="260" y="92" text-anchor="middle" class="svg-text-mono" fill="#5a6a3e">Agent 生产</text>
+
+            <!-- 右 -->
+            <circle cx="420" cy="240" r="44" fill="#fdfaf3" stroke="#2d5a5a" stroke-width="1"/>
+            <text x="420" y="234" text-anchor="middle" class="svg-text" font-size="12" font-weight="500">审核</text>
+            <text x="420" y="252" text-anchor="middle" class="svg-text-mono" fill="#2d5a5a">人 / 委员会</text>
+
+            <!-- 下 -->
+            <circle cx="260" cy="400" r="44" fill="#fdfaf3" stroke="#b08840" stroke-width="1"/>
+            <text x="260" y="394" text-anchor="middle" class="svg-text" font-size="12" font-weight="500">应用</text>
+            <text x="260" y="412" text-anchor="middle" class="svg-text-mono" fill="#b08840">线上灰度</text>
+
+            <!-- 左 -->
+            <circle cx="100" cy="240" r="44" fill="#fdfaf3" stroke="#8b2a1f" stroke-width="1"/>
+            <text x="100" y="234" text-anchor="middle" class="svg-text" font-size="12" font-weight="500">回流</text>
+            <text x="100" y="252" text-anchor="middle" class="svg-text-mono" fill="#8b2a1f">效果回流</text>
+          </g>
+
+          <!-- 旋转箭头 -->
+          <g fill="none" stroke="#181612" stroke-width="1">
+            <path d="M 300,90 Q 380,140 414,200" marker-end="url(#a4)"/>
+            <path d="M 414,280 Q 380,340 300,390" marker-end="url(#a4)"/>
+            <path d="M 220,390 Q 140,340 106,280" marker-end="url(#a4)"/>
+            <path d="M 106,200 Q 140,140 220,90" marker-end="url(#a4)"/>
+          </g>
+          <defs>
+            <marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#181612"/>
+            </marker>
+          </defs>
+
+          <!-- 标题 -->
+          <text x="260" y="32" text-anchor="middle" class="svg-text-mono">闭环节奏 · 从单环跑通到多环并行</text>
+
+          <!-- 进度条 -->
+          <g transform="translate(40,452)">
+            <rect x="0" y="0" width="440" height="14" fill="rgba(24,22,18,0.04)" stroke="#c9bfae" stroke-width="0.5"/>
+            <rect x="0" y="0" width="176" height="14" fill="#5a6a3e"/>
+            <rect x="176" y="0" width="132" height="14" fill="#b08840" opacity="0.6"/>
+            <rect x="308" y="0" width="132" height="14" fill="#8b2a1f" opacity="0.3"/>
+
+            <text x="88" y="-4" text-anchor="middle" class="svg-text-mono" fill="#5a6a3e">已验证 · 决策+沉淀</text>
+            <text x="242" y="-4" text-anchor="middle" class="svg-text-mono" fill="#b08840">灰度中 · 识别+流转</text>
+            <text x="374" y="-4" text-anchor="middle" class="svg-text-mono" fill="#8b2a1f">攻坚中 · 进化</text>
+          </g>
+        </svg>
+        <div class="visual-caption">
+          四节点飞轮 + 三阶段进度条。"先建飞轮、再做规模"是这一节的灵魂——
+          它告诉面试官你在做<em>有节奏的操盘</em>，不是平铺直叙的功能堆砌。
+        </div>
+      </div>
+    </div>
+
+    <div class="speech-pane">
+      <div class="speech-block">
+        <div class="block-label">飞轮口播 · 项目节奏陈述</div>
+        <div class="speech-content">
+          五条主线如果同时推进，会平摊资源、什么都做不深。<span class="pause">/</span>
+          我的节奏是<strong>"先建飞轮、再做规模"</strong>。<span class="pause">//</span>
+          <strong>第一阶段</strong>——<span class="pause">/</span>
+          先打透「审核决策 + 知识沉淀」这两条最关键的主线，<span class="pause">/</span>
+          把闭环跑通、效果验证、专家信任建立。<span class="pause">//</span>
+          <strong>第二阶段</strong>——<span class="pause">/</span>
+          扩展「风险识别 + 案件流转」，<span class="pause">/</span>
+          把上层业务能力全面 Agent 化，现在在灰度。<span class="pause">//</span>
+          <strong>第三阶段</strong>——<span class="pause">/</span>
+          攻坚「自我进化」，<span class="pause">/</span>
+          让系统从"人驱动"走向"AI 驱动"。<span class="pause">//</span>
+          这套节奏的本质是：<span class="pause">/</span>
+          <strong>用最少的资源先证明飞轮能转</strong>，<span class="pause">/</span>
+          再用飞轮自身的产出去支撑后续主线。
+        </div>
+        <div class="speech-meta">
+          <span>三段式节奏</span><span>三阶段进度</span><span>资源管理叙事</span>
+        </div>
+      </div>
+
+      <div class="highlight-block">
+        <div class="block-label">核心亮点</div>
+        <ul class="highlight-list">
+          <li><span><strong>"先建飞轮、再做规模"</strong>——这句话能立刻让面试官认出你的项目操盘心法。</span></li>
+          <li><span><strong>诚实分级</strong>——已验证 / 灰度中 / 攻坚中。区别于浮夸地"全都做完了"。</span></li>
+          <li><span><strong>资源管理视角</strong>——主动提"五条主线如果同时推进会平摊资源"，体现你的取舍能力。</span></li>
+          <li><span><strong>专家信任的提及</strong>——风控领域，让资深审核员信任 Agent 比技术指标更难。这是操盘者才会想到的。</span></li>
+        </ul>
+      </div>
+
+      <div class="pitfall-block">
+        <div class="block-label">常见误区</div>
+        <ul class="pitfall-list">
+          <li>
+            <span class="pitfall-wrong">用"功能清单"汇报进度：我们做了 A、B、C、D、E、F……</span>
+            <span class="pitfall-right">改用"飞轮验证度"：哪个环节闭环了，哪个还没闭环，闭环依靠什么。</span>
+          </li>
+          <li>
+            <span class="pitfall-wrong">把所有主线说成"已完成"，把所有数据说得很美。</span>
+            <span class="pitfall-right">主动暴露"进化主线还在攻坚"，反而更可信。</span>
+          </li>
+          <li>
+            <span class="pitfall-wrong">只讲"做了什么"，不讲"为什么按这个顺序做"。</span>
+            <span class="pitfall-right">操盘者的核心价值就在"顺序设计"上——讲清楚为什么先 A 后 B。</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 章节 5：操盘 ============ -->
+<section class="chapter" id="ch5">
+  <div class="chapter-head">
+    <div>
+      <div class="chapter-tag">Chapter Five</div>
+      <div class="chapter-num">v · 操盘</div>
+    </div>
+    <div>
+      <h2 class="chapter-title">操盘者的<em>权衡与取舍</em></h2>
+      <p class="chapter-lede">
+        到这一章，你已经讲清楚了"是什么、为什么不一样、怎么搭"。
+        操盘者真正的护城河，是<em>判断力</em>——在两个都对的方案之间选一个，
+        在两个都错的现实里走一条。
+      </p>
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="visual-pane">
+      <div class="visual-frame" data-fig="05">
+        <svg viewBox="0 0 520 460" xmlns="http://www.w3.org/2000/svg">
+          <text x="30" y="32" class="svg-text-mono">操盘者三把尺 · THREE TRADE-OFFS</text>
+          <line x1="30" y1="40" x2="490" y2="40" stroke="#181612" stroke-width="0.5"/>
+
+          <!-- 尺 1：自治 vs 保守 -->
+          <g transform="translate(30,60)">
+            <text x="0" y="0" class="svg-text" font-size="12" font-weight="500">尺一 · 自治度 × 风险敏感度</text>
+            <text x="0" y="18" class="svg-text-mono" font-style="italic" fill="#8b2a1f">"越靠近自治，越需要保守"</text>
+
+            <rect x="0" y="32" width="460" height="40" fill="rgba(24,22,18,0.03)" stroke="#c9bfae" stroke-width="0.5"/>
+            <line x1="0" y1="52" x2="460" y2="52" stroke="#c9bfae" stroke-width="0.5" stroke-dasharray="2,2"/>
+
+            <circle cx="60" cy="52" r="6" fill="#5a6a3e"/>
+            <text x="60" y="86" text-anchor="middle" class="svg-text-mono">人审为主</text>
+
+            <circle cx="200" cy="52" r="6" fill="#b08840"/>
+            <text x="200" y="86" text-anchor="middle" class="svg-text-mono">Agent 建议</text>
+
+            <circle cx="340" cy="52" r="6" fill="#8b2a1f"/>
+            <text x="340" y="86" text-anchor="middle" class="svg-text-mono">Agent 主导</text>
+
+            <circle cx="430" cy="52" r="6" fill="#8b2a1f" stroke="#fdfaf3" stroke-width="1.5"/>
+            <text x="430" y="86" text-anchor="middle" class="svg-text-mono">全自治</text>
+
+            <text x="0" y="110" class="svg-text-mono">低风险 ←</text>
+            <text x="460" y="110" text-anchor="end" class="svg-text-mono">→ 高风险</text>
+          </g>
+
+          <!-- 尺 2：闭环 vs 兜底 -->
+          <g transform="translate(30,200)">
+            <text x="0" y="0" class="svg-text" font-size="12" font-weight="500">尺二 · 自我进化 × 兜底机制</text>
+            <text x="0" y="18" class="svg-text-mono" font-style="italic" fill="#8b2a1f">"自我进化不能完全闭环"</text>
+
+            <rect x="0" y="32" width="460" height="50" fill="rgba(24,22,18,0.03)" stroke="#c9bfae" stroke-width="0.5"/>
+
+            <g transform="translate(20,42)">
+              <rect x="0" y="0" width="100" height="30" fill="#fdfaf3" stroke="#5a6a3e" stroke-width="0.8"/>
+              <text x="50" y="12" text-anchor="middle" class="svg-text-mono" fill="#5a6a3e">Agent 监控</text>
+              <text x="50" y="24" text-anchor="middle" class="svg-text-mono">效果衰减</text>
+
+              <text x="115" y="20" class="svg-text-mono">→</text>
+
+              <rect x="130" y="0" width="100" height="30" fill="#fdfaf3" stroke="#b08840" stroke-width="0.8"/>
+              <text x="180" y="12" text-anchor="middle" class="svg-text-mono" fill="#b08840">Agent 生成</text>
+              <text x="180" y="24" text-anchor="middle" class="svg-text-mono">候选迭代</text>
+
+              <text x="245" y="20" class="svg-text-mono">→</text>
+
+              <rect x="260" y="0" width="100" height="30" fill="#fdfaf3" stroke="#8b2a1f" stroke-width="1.5"/>
+              <text x="310" y="12" text-anchor="middle" class="svg-text-mono" fill="#8b2a1f">人审 / 委员会</text>
+              <text x="310" y="24" text-anchor="middle" class="svg-text-mono">必经环节</text>
+
+              <text x="375" y="20" class="svg-text-mono">→</text>
+
+              <rect x="390" y="0" width="40" height="30" fill="#fdfaf3" stroke="#181612" stroke-width="0.8"/>
+              <text x="410" y="20" text-anchor="middle" class="svg-text-mono">上线</text>
+            </g>
+          </g>
+
+          <!-- 尺 3：范围 vs 深度 -->
+          <g transform="translate(30,320)">
+            <text x="0" y="0" class="svg-text" font-size="12" font-weight="500">尺三 · 整体规划 × 分主线突破</text>
+            <text x="0" y="18" class="svg-text-mono" font-style="italic" fill="#8b2a1f">"摊子要大，但落地要尖"</text>
+
+            <!-- 五条主线进度 -->
+            <g transform="translate(0,36)">
+              <text x="0" y="12" class="svg-text-mono">识别</text>
+              <rect x="50" y="3" width="380" height="10" fill="rgba(24,22,18,0.04)" stroke="#c9bfae" stroke-width="0.4"/>
+              <rect x="50" y="3" width="170" height="10" fill="#b08840" opacity="0.6"/>
+
+              <text x="0" y="32" class="svg-text-mono">决策</text>
+              <rect x="50" y="23" width="380" height="10" fill="rgba(24,22,18,0.04)" stroke="#c9bfae" stroke-width="0.4"/>
+              <rect x="50" y="23" width="320" height="10" fill="#5a6a3e"/>
+
+              <text x="0" y="52" class="svg-text-mono">流转</text>
+              <rect x="50" y="43" width="380" height="10" fill="rgba(24,22,18,0.04)" stroke="#c9bfae" stroke-width="0.4"/>
+              <rect x="50" y="43" width="140" height="10" fill="#b08840" opacity="0.6"/>
+
+              <text x="0" y="72" class="svg-text-mono">沉淀</text>
+              <rect x="50" y="63" width="380" height="10" fill="rgba(24,22,18,0.04)" stroke="#c9bfae" stroke-width="0.4"/>
+              <rect x="50" y="63" width="340" height="10" fill="#5a6a3e"/>
+
+              <text x="0" y="92" class="svg-text-mono">进化</text>
+              <rect x="50" y="83" width="380" height="10" fill="rgba(24,22,18,0.04)" stroke="#c9bfae" stroke-width="0.4"/>
+              <rect x="50" y="83" width="90" height="10" fill="#8b2a1f" opacity="0.3"/>
+            </g>
+          </g>
+
+          <text x="490" y="448" text-anchor="end" class="svg-text-mono" font-style="italic">操盘者的"判断刻度"</text>
+        </svg>
+        <div class="visual-caption">
+          三把尺，三个权衡。这一节不像前面那样追求"全景画面"，
+          而是用<em>具体的判断细节</em>——尤其是那些"反 AI 神话"的判断——证明你不是被技术冲昏头的工程师。
+        </div>
+      </div>
+    </div>
+
+    <div class="speech-pane">
+      <div class="speech-block">
+        <div class="block-label">三把尺口播 · 操盘者金句库</div>
+        <div class="speech-content">
+          作为操盘者，我有<strong>三把判断尺</strong>。<span class="pause">//</span>
+          <strong>第一把尺·自治度与风险敏感度</strong>。<span class="pause">/</span>
+          风控领域有一句反直觉的话：<span class="pause">/</span>
+          <em>"越靠近自治，越需要保守。"</em><span class="pause">/</span>
+          低风险场景可以全自治，<span class="pause">/</span>
+          高风险场景必须 Agent 建议 + 人审兜底，<span class="pause">/</span>
+          这是我们 Harness 设计的核心原则。<span class="pause">//</span>
+          <strong>第二把尺·自我进化与兜底</strong>。<span class="pause">/</span>
+          自我进化主线我们专门留了一道<strong>不能完全闭环</strong>的设计——<span class="pause">/</span>
+          Agent 可以监控衰减、可以生成候选迭代，<span class="pause">/</span>
+          但<strong>人审委员会是必经环节</strong>。<span class="pause">/</span>
+          这不是技术能力问题，<span class="pause">/</span>
+          这是合规和治理的问题。<span class="pause">//</span>
+          <strong>第三把尺·整体规划与分主线突破</strong>。<span class="pause">/</span>
+          摊子要大、整体设计要完整，<span class="pause">/</span>
+          但落地要尖——先打透两条主线，再扩展。<span class="pause">/</span>
+          这是大项目能稳的关键。
+        </div>
+        <div class="speech-meta">
+          <span>金句一·越自治越保守</span><span>金句二·进化不能闭环</span><span>金句三·摊子大但落地尖</span>
+        </div>
+      </div>
+
+      <div class="highlight-block">
+        <div class="block-label">核心亮点</div>
+        <ul class="highlight-list">
+          <li><span><strong>"反 AI 神话"的判断</strong>——主动说"自我进化不能完全闭环"，能立刻让面试官认出你是有判断力的操盘者，而不是被技术冲昏头的人。</span></li>
+          <li><span><strong>合规与技术分离</strong>——"这不是技术能力问题，是合规和治理问题"——风控领域专属的成熟度表达。</span></li>
+          <li><span><strong>"摊子大但落地尖"</strong>——这句话同时回应了"格局虚高"和"做得不深"两种质疑，是兜底金句。</span></li>
+          <li><span><strong>主动暴露权衡而非全是优点</strong>——成熟的操盘者会主动讲取舍，不成熟的人只讲方案。</span></li>
+        </ul>
+      </div>
+
+      <div class="pitfall-block">
+        <div class="block-label">常见误区</div>
+        <ul class="pitfall-list">
+          <li>
+            <span class="pitfall-wrong">"Agent 自治度越高越好，我们做到了 X% 自动化。"</span>
+            <span class="pitfall-right">风控领域反过来——"越自治越保守"。盲目追求自治率是不懂行业。</span>
+          </li>
+          <li>
+            <span class="pitfall-wrong">"我们的系统已经实现了完全自动迭代，不需要人介入。"</span>
+            <span class="pitfall-right">主动留人审环节，反而是成熟的设计。完全闭环 = 失控风险。</span>
+          </li>
+          <li>
+            <span class="pitfall-wrong">被追问技术细节时硬撑，假装每个模块都自己写的。</span>
+            <span class="pitfall-right">承认"具体代码细节是 XX 同学主导，我从架构设计层面理解是 ABC"，反而显诚信。</span>
+          </li>
+          <li>
+            <span class="pitfall-wrong">把"反思"讲成"做得不够好的地方"，自我贬低。</span>
+            <span class="pitfall-right">把反思讲成"已经迭代过的判断"——曾经选过 A，发现问题后改成了 B。</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 底部问答区 ============ -->
+<section class="qa-section">
+  <div class="qa-inner">
+    <div class="qa-header">
+      <div>
+        <div class="chapter-tag">Appendix</div>
+        <div class="chapter-num">vi · 问答弹药库</div>
+      </div>
+      <div>
+        <h2 class="qa-title">面试官的<em>追问</em>与你的<em>回响</em></h2>
+        <p class="qa-lede">
+          下面这些题目，建议练到不假思索就能给出第一句话。第一句话定位准了，后面就有时间组织。
+          标记为 <strong>陷阱</strong> 的题目是判断你视野和成熟度的题，标记为 <strong>难</strong> 的是判断你深度的题。
+        </p>
+      </div>
+    </div>
+
+    <div class="qa-grid">
+
+      <!-- Q1 -->
+      <div class="qa-card">
+        <div class="qa-difficulty trap">陷阱</div>
+        <div class="qa-num">Q · 01</div>
+        <div class="qa-q">你说改造整个领域，会不会摊子铺得太大、什么都做不深？</div>
+        <div class="qa-intent">考察意图：<strong>戳"格局虚高"</strong></div>
+        <div class="qa-a">
+          我们用<strong>"整体规划 + 分主线突破"</strong>的方式管摊子。<em>全景设计是必须的</em>——五条主线之间有强耦合，没有整体设计就会各自为战。
+          但落地<em>绝不平铺</em>，按"先有飞轮、再有规模"先打透「审核决策 + 知识沉淀」两条主线，跑通、验证、建立信任，再向外扩。
+          这跟单做"知识管理一个模块"的本质区别在于——架构、Harness、上下文层一开始就为五条主线设计，<strong>避免后期重构。</strong>
+        </div>
+        <div class="qa-tip">"整体规划 + 分主线突破" 是大项目操盘的核心标签</div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="qa-card">
+        <div class="qa-difficulty trap">陷阱</div>
+        <div class="qa-num">Q · 02</div>
+        <div class="qa-q">这五条主线为什么是这五条？是怎么拆出来的？</div>
+        <div class="qa-intent">考察意图：<strong>拆解逻辑</strong></div>
+        <div class="qa-a">
+          按<strong>"风控审核的完整生命周期"</strong>拆。任何风险事件都会经历——被发现（识别）→ 被判定（决策）→ 被处置（流转）→ 被沉淀（知识）→ 被进化（迭代），缺一不可。
+          拆解原则三条：<em>每条主线独立价值闭环</em>、<em>每条对应真实业务痛点</em>、<em>主线之间能复用底层能力</em>——所以抽出三大支柱作为公共基础。
+        </div>
+        <div class="qa-tip">"生命周期"是体系化思维的锚点</div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="qa-card">
+        <div class="qa-difficulty">基础</div>
+        <div class="qa-num">Q · 03</div>
+        <div class="qa-q">你的 Agent 和直接用 GPT-4 调 API 有什么本质区别？</div>
+        <div class="qa-intent">考察意图：<strong>对 Agent 的理解深度</strong></div>
+        <div class="qa-a">
+          三个本质区别。一，<strong>自主规划</strong>——Agent 自己决定调研什么、调用哪些工具，不是被动应答。
+          二，<strong>工具调用闭环</strong>——Agent 能查询黑词库、关联图谱、外部信息，证据强制引用。
+          三，<strong>领域 Harness</strong>——什么能做、什么必须人审，由我们写死的边界控制，而不是模型自由发挥。
+          直接调 API 是"问答机"，Agent 是<em>"会做事的同事"</em>。
+        </div>
+        <div class="qa-tip">用"问答机 vs 做事的同事"这个比喻收口</div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="qa-card">
+        <div class="qa-difficulty hard">难</div>
+        <div class="qa-num">Q · 04</div>
+        <div class="qa-q">Agent 出错了怎么兜底？误杀一个用户的代价怎么承受？</div>
+        <div class="qa-intent">考察意图：<strong>风险意识与工程保障</strong></div>
+        <div class="qa-a">
+          四层兜底。<em>第一层</em>·分层决策——按风险等级走不同自治度，高风险必经人审。
+          <em>第二层</em>·置信度门限——Agent 自己判断置信不足时主动转人审。
+          <em>第三层</em>·证据强制引用——每个判定必须挂靠工具返回结果，没有证据就拒绝判定。
+          <em>第四层</em>·灰度 + 回滚 + 影子模式——新策略先并行运行，效果验证后再切流。
+          我们的设计原则是：<strong>宁可漏放，不能误杀。</strong>
+        </div>
+        <div class="qa-tip">"宁可漏放，不能误杀" 是风控领域专业表态</div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="qa-card">
+        <div class="qa-difficulty hard">难</div>
+        <div class="qa-num">Q · 05</div>
+        <div class="qa-q">幻觉怎么控？黑产用对抗性 Prompt 怎么防？</div>
+        <div class="qa-intent">考察意图：<strong>安全工程能力</strong></div>
+        <div class="qa-a">
+          幻觉控制——<strong>证据强制引用</strong>（无证据则拒绝判定）+ <strong>关键决策双模型交叉验证</strong> + <strong>置信度校准</strong>。
+          对抗 Prompt——输入侧的<em>内容隔离</em>（用户内容用 XML 包裹 + role 分离，让模型清楚这是被审核内容不是指令）、
+          输出侧的<em>结构化校验</em>（必须符合预设 Schema 才接受）、
+          以及<em>越狱检测前置链路</em>（专门有一道 Agent 识别可疑指令）。
+        </div>
+        <div class="qa-tip">XML 包裹 + 越狱检测前置 是工程深度信号</div>
+      </div>
+
+      <!-- Q6 -->
+      <div class="qa-card">
+        <div class="qa-difficulty">基础</div>
+        <div class="qa-num">Q · 06</div>
+        <div class="qa-q">为什么不用传统机器学习模型？</div>
+        <div class="qa-intent">考察意图：<strong>技术选型判断</strong></div>
+        <div class="qa-a">
+          不是不用，而是<strong>分工不同</strong>。传统模型在<em>高频、稳定、明确</em>的场景仍然最强——比如成熟黑词识别。
+          Agent 的不可替代价值在<em>低频、新型、长尾</em>——
+          冷启动场景（没有足够样本训不出模型）、可解释要求（监管要追溯思维链）、新型风险快速适配（不需要重新训练）。
+          实际系统里两者<em>共存互补</em>，规则引擎 + 传统模型预筛，Agent 处理复杂 case。
+        </div>
+        <div class="qa-tip">不贬低传统方案，体现你的工程成熟度</div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="qa-card">
+        <div class="qa-difficulty">基础</div>
+        <div class="qa-num">Q · 07</div>
+        <div class="qa-q">评测怎么做的？bad case 怎么闭环？</div>
+        <div class="qa-intent">考察意图：<strong>工程闭环能力</strong></div>
+        <div class="qa-a">
+          四个环节。一，<strong>离线评测集</strong>——分层抽样的标注集，覆盖典型 case + 长尾 + 对抗样本。
+          二，<strong>人工标注双盲</strong>——两个标注员独立标，分歧 case 再仲裁。
+          三，<strong>线上 A/B + 影子模式</strong>——新策略和老策略并行，看实际差异。
+          四，<strong>bad case 自动归集</strong>——线上反馈进入待评审队列，由 Agent 提案修复方案，进入知识沉淀飞轮。
+          闭环关键是<em>bad case 不能进死信队列</em>，必须有归属人和处置截止时间。
+        </div>
+        <div class="qa-tip">"不能进死信队列" 是工程纪律的体现</div>
+      </div>
+
+      <!-- Q8 -->
+      <div class="qa-card">
+        <div class="qa-difficulty hard">难</div>
+        <div class="qa-num">Q · 08</div>
+        <div class="qa-q">成本怎么控？LLM 调用 + 多 Agent 链路成本很高吧？</div>
+        <div class="qa-intent">考察意图：<strong>工程成本意识</strong></div>
+        <div class="qa-a">
+          四个手段。<em>一</em>·<strong>模型分层</strong>——轻量模型预筛 80% 简单 case，大模型只处理 20% 复杂 case。
+          <em>二</em>·<strong>相似 case 缓存复用</strong>——历史判定结果做语义检索，命中则直接复用。
+          <em>三</em>·<strong>并行工具调用</strong>——独立工具不串行等待，并行 fetch。
+          <em>四</em>·<strong>Token 预算控制</strong>——单 case 有硬上限，超过则降级或转人审。
+          整体上 Agent 比纯人审还便宜，关键是<strong>不要把 Agent 当万能工具</strong>。
+        </div>
+        <div class="qa-tip">"不要把 Agent 当万能工具" 是反 AI 神话的表态</div>
+      </div>
+
+      <!-- Q9 -->
+      <div class="qa-card">
+        <div class="qa-difficulty trap">陷阱</div>
+        <div class="qa-num">Q · 09</div>
+        <div class="qa-q">你个人主要负责哪条主线？其他主线了解多少？</div>
+        <div class="qa-intent">考察意图：<strong>区分操盘者 vs 执行者</strong></div>
+        <div class="qa-a">
+          我的角色是<strong>整体操盘者</strong>。深度参与的是<em>「审核决策 + 知识沉淀」</em>，包括架构设计、技术选型、核心模块代码。
+          另外几条主线参与了<em>整体设计和关键节点评审</em>，具体执行由其他同学负责。
+          五条主线之间的<em>协同设计、接口对齐、Harness 规范</em>由我牵头。
+          所以您问到任何一条主线，我都能讲清楚<strong>它的设计思路和关键决策</strong>；
+          具体到某个模块的代码细节，可能我了解的不如负责的同学深入。
+        </div>
+        <div class="qa-tip">诚实分级比假装全懂更可信</div>
+      </div>
+
+      <!-- Q10 -->
+      <div class="qa-card">
+        <div class="qa-difficulty">基础</div>
+        <div class="qa-num">Q · 10</div>
+        <div class="qa-q">为什么选 Planner-Worker，不用单 Agent + ReAct？</div>
+        <div class="qa-intent">考察意图：<strong>架构演进意识</strong></div>
+        <div class="qa-a">
+          早期我们就是用单 Agent + ReAct，发现两个问题。
+          一，<em>复杂 case 推理路径发散</em>——审核维度多了之后，单 Agent 容易遗漏维度或重复调研。
+          二，<em>调试和优化困难</em>——一条长推理链出错，定位很难。
+          后来改成 Planner-Worker：<strong>Planner 拆审核维度</strong>，<strong>Worker 各自完成单维度调研</strong>，最后聚合判定。
+          好处是路径稳定可观测，缺点是灵活性下降——所以低风险简单 case 仍走单 Agent。
+        </div>
+        <div class="qa-tip">主动暴露"早期我们就是 X，后来改成 Y"的演进路径</div>
+      </div>
+
+      <!-- Q11 -->
+      <div class="qa-card">
+        <div class="qa-difficulty trap">陷阱</div>
+        <div class="qa-num">Q · 11</div>
+        <div class="qa-q">如果让你重做一次，会怎么改进？</div>
+        <div class="qa-intent">考察意图：<strong>反思深度</strong></div>
+        <div class="qa-a">
+          三个方向。一，<strong>更早建立 Schema</strong>——前期 Schema 变更几次，每次全库迁移代价大，应该一开始就跟资深审核员共创。
+          二，<strong>Harness 应该和业务方一起设计</strong>，而不是技术团队先设计再过审——这样能避免合规返工。
+          三，<strong>评测集要做版本化</strong>——早期评测集变更后老指标失效，对比困难。
+          再做一次的话，<em>"宁可起步慢，也要在 Schema、Harness、评测三件事上一次做对。"</em>
+        </div>
+        <div class="qa-tip">具体到三件事，远胜泛谈"会做得更好"</div>
+      </div>
+
+      <!-- Q12 -->
+      <div class="qa-card">
+        <div class="qa-difficulty hard">难</div>
+        <div class="qa-num">Q · 12</div>
+        <div class="qa-q">自我进化主线最难在哪？你说"不能完全闭环"是因为做不到吗？</div>
+        <div class="qa-intent">考察意图：<strong>技术 + 治理双重判断</strong></div>
+        <div class="qa-a">
+          不是技术做不到，是<em>不应该</em>。技术上 Agent 完全可以监控衰减、生成迭代、自动上线，<strong>但风控领域不能这么做</strong>。
+          原因有三。<em>一</em>·合规——风控策略变更涉及用户权益，监管要求人为可追溯。
+          <em>二</em>·对抗安全——如果完全闭环，黑产可以通过构造样本来"教坏"系统。
+          <em>三</em>·价值观对齐——什么算"违规"涉及社会价值判断，不能让 Agent 单方面定义。
+          所以我们专门留<strong>人审委员会作为必经环节</strong>——<em>"越靠近自治，越需要保守。"</em>
+        </div>
+        <div class="qa-tip">把"不能做"讲成"主动选择不做"，体现治理思维</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ 底注 ============ -->
+<section class="colophon">
+  <div class="colophon-mark">※</div>
+  <p class="colophon-text">
+    这本训练手册不是给面试官看的，是给你自己看的。
+    把每章右侧的口播练到能不假思索说出，把每章左侧的图练到能在白板上 60 秒画出，
+    把底部的 12 道题练到第一句话脱口而出。然后忘记这本手册，<em>用自己的语言重新讲一遍</em>。
+  </p>
+  <div class="colophon-meta">AI Native Interview Pack · V1.0 · 训练手册 / Training Manual</div>
+</section>
+
+</body>
+</html>

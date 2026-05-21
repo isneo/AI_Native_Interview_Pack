@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI 原生风控平台｜评审整合版</title>
+  <style>
+    :root {
+      --bg: #f5f2ea;
+      --paper: #fffdf7;
+      --ink: #1f2523;
+      --muted: #6e746f;
+      --line: #d9d2c2;
+      --line-strong: #b9ad96;
+      --green: #246b57;
+      --green-soft: #e4efe9;
+      --blue: #275f89;
+      --blue-soft: #e5eef5;
+      --red: #9f3f34;
+      --red-soft: #f4e4df;
+      --amber: #a96d1d;
+      --amber-soft: #f6ead6;
+      --slate: #39434b;
+      --shadow: 0 18px 45px rgba(31, 37, 35, .10);
+      --radius: 8px;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(31,37,35,.035) 1px, transparent 1px) 0 0 / 24px 24px,
+        linear-gradient(180deg, rgba(31,37,35,.028) 1px, transparent 1px) 0 0 / 24px 24px,
+        var(--bg);
+      font-family: var(--sans);
+      line-height: 1.55;
+      overflow-x: hidden;
+    }
+
+    button { font: inherit; }
+    button {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform .16s ease, border-color .16s ease, background .16s ease, color .16s ease;
+    }
+    button:hover { transform: translateY(-1px); border-color: var(--line-strong); }
+    button:focus-visible, details:focus-within { outline: 3px solid rgba(36,107,87,.22); outline-offset: 2px; }
+
+    .page { width: min(1480px, calc(100vw - 32px)); margin: 0 auto; padding: 24px 0 56px; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      padding: 14px 0 16px;
+      background: linear-gradient(180deg, var(--bg) 72%, rgba(245,242,234,0));
+    }
+    .brandline { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+    .brandline h1 { margin: 0; font-size: 22px; line-height: 1.2; letter-spacing: 0; overflow-wrap: anywhere; }
+    .brandline span { color: var(--muted); font-size: 13px; white-space: nowrap; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .actions button { padding: 8px 10px; font-size: 13px; }
+    .actions .primary { background: var(--green); color: #fff; border-color: var(--green); }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(320px, .85fr);
+      gap: 18px;
+      align-items: stretch;
+      margin: 8px 0 18px;
+    }
+    .thesis, .scorecard, .panel, .script, .qa-zone {
+      border: 1px solid var(--line);
+      background: rgba(255,253,247,.9);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+    }
+    .thesis { padding: 22px; }
+    .kicker { color: var(--green); font-weight: 800; font-size: 13px; margin-bottom: 8px; }
+    .thesis h2 {
+      margin: 0 0 10px;
+      max-width: 1000px;
+      font-size: clamp(30px, 3vw, 48px);
+      line-height: 1.08;
+      letter-spacing: 0;
+      overflow-wrap: anywhere;
+    }
+    .thesis p { margin: 0; max-width: 960px; color: #444b47; font-size: 17px; }
+    .scorecard { padding: 18px; display: grid; align-content: center; gap: 12px; }
+    .scoreline { display: grid; grid-template-columns: 92px 1fr 62px; align-items: center; gap: 9px; font-size: 13px; }
+    .bar { height: 9px; border: 1px solid var(--line); background: #f3efe5; border-radius: 999px; overflow: hidden; }
+    .bar span { display: block; height: 100%; background: var(--green); border-radius: inherit; }
+    .scoreline:nth-child(2) .bar span { background: var(--blue); }
+    .scoreline:nth-child(3) .bar span { background: var(--amber); }
+    .scoreline:nth-child(4) .bar span { background: var(--red); }
+
+    .navstrip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 0 14px;
+      scrollbar-width: thin;
+    }
+    .navstrip button {
+      min-width: max-content;
+      padding: 10px 12px;
+      font-weight: 700;
+      font-size: 13px;
+      background: rgba(255,253,247,.74);
+    }
+    .navstrip button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+    .workbench {
+      display: grid;
+      grid-template-columns: minmax(560px, 1.12fr) minmax(360px, .8fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .panel, .script, .qa-zone { padding: 16px; }
+    .script {
+      position: sticky;
+      top: 74px;
+      max-height: calc(100vh - 92px);
+      overflow: auto;
+    }
+    .pane-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .pane-head h2, .qa-zone h2 { margin: 0; font-size: 20px; letter-spacing: 0; }
+    .smallcap { color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+    .chip, .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 4px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--paper);
+      color: var(--slate);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .definition {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fffaf0;
+    }
+    .definition h3 { margin: 0; font-size: 24px; line-height: 1.18; letter-spacing: 0; }
+    .definition p { margin: 0; color: #3f4743; font-size: 15px; }
+    .essence {
+      padding: 12px;
+      border-left: 4px solid var(--green);
+      background: var(--green-soft);
+      border-radius: 6px;
+      font-weight: 800;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .cell {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      padding: 12px;
+      min-width: 0;
+    }
+    .cell h4 { margin: 0 0 6px; font-size: 16px; line-height: 1.25; }
+    .cell p { margin: 0; color: var(--muted); font-size: 14px; }
+    .cell.green { background: var(--green-soft); border-color: rgba(36,107,87,.24); }
+    .cell.blue { background: var(--blue-soft); border-color: rgba(39,95,137,.23); }
+    .cell.amber { background: var(--amber-soft); border-color: rgba(169,109,29,.24); }
+    .cell.red { background: var(--red-soft); border-color: rgba(159,63,52,.24); }
+
+    .compare {
+      display: grid;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 12px 0;
+      background: var(--paper);
+    }
+    .compare.cols-3 { grid-template-columns: 150px minmax(0, 1fr) minmax(0, 1fr); }
+    .compare.cols-4 { grid-template-columns: 140px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); }
+    .compare.cols-5 { grid-template-columns: 120px repeat(4, minmax(0, 1fr)); }
+    .compare div { padding: 10px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); min-width: 0; font-size: 14px; }
+    .compare.cols-3 div:nth-child(3n), .compare.cols-4 div:nth-child(4n), .compare.cols-5 div:nth-child(5n) { border-right: 0; }
+    .compare .head { font-weight: 900; background: #efe8da; }
+    .compare .label { color: var(--muted); font-weight: 800; }
+
+    .flow { display: grid; gap: 8px; margin-top: 12px; }
+    .flow-node {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 10px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      border-radius: var(--radius);
+    }
+    .num {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: var(--green);
+      color: #fff;
+      font-weight: 900;
+      font-size: 13px;
+    }
+    .flow-node b { display: block; line-height: 1.25; }
+    .flow-node span { color: var(--muted); font-size: 13px; }
+
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .tabs button { padding: 8px 10px; font-size: 13px; font-weight: 800; }
+    .tabs button.active { background: var(--green); color: #fff; border-color: var(--green); }
+    .talk-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fffaf0;
+      padding: 13px;
+      margin-bottom: 12px;
+    }
+    .talk-card h3 { margin: 0 0 8px; font-size: 15px; letter-spacing: 0; }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: 0;
+      color: #2f3733;
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .note-list { margin: 0; padding-left: 18px; color: #3d4541; }
+    .note-list li { margin: 6px 0; }
+    .chip-row { display: flex; gap: 7px; flex-wrap: wrap; }
+
+    .qa-zone { margin-top: 18px; }
+    .qa-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .qa-tools { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    .qa-tools button { padding: 8px 10px; font-size: 13px; font-weight: 800; }
+    .qa-tools button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .qa-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    details {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      border-radius: var(--radius);
+      padding: 12px;
+    }
+    summary { cursor: pointer; font-weight: 900; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary span { display: block; margin-top: 4px; color: var(--green); font-size: 12px; }
+    details p { margin: 10px 0 0; color: #3f4743; font-size: 14px; }
+
+    .copy-toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 50;
+      padding: 10px 12px;
+      background: var(--ink);
+      color: #fff;
+      border-radius: 6px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .16s ease, transform .16s ease;
+      pointer-events: none;
+    }
+    .copy-toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 1180px) {
+      .hero, .workbench { grid-template-columns: 1fr; }
+      .script { position: static; max-height: none; }
+      .grid-3, .grid-2, .qa-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .page { width: min(100vw - 20px, 1480px); padding-bottom: 32px; }
+      .page, .topbar, .hero, .workbench, .panel, .script, .qa-zone { min-width: 0; }
+      .topbar, .qa-head { grid-template-columns: 1fr; }
+      .brandline { display: grid; gap: 4px; }
+      .brandline h1 { font-size: 18px; word-break: break-all; }
+      .brandline span { white-space: normal; }
+      .actions, .qa-tools { justify-content: flex-start; }
+      .thesis { padding: 16px; }
+      .thesis h2 { font-size: 32px; word-break: break-all; }
+      .compare, .compare.cols-3, .compare.cols-4, .compare.cols-5 { grid-template-columns: 1fr; }
+      .compare div { border-right: 0; border-bottom: 1px solid var(--line); }
+      .compare div:last-child { border-bottom: 0; }
+      .scoreline { grid-template-columns: 82px minmax(0, 1fr); }
+      .scoreline strong { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="brandline">
+        <h1>AI 原生风控平台｜评审整合版</h1>
+        <span>业务背景 · 演进路径 · MVP 证据 · Agent 评测</span>
+      </div>
+      <div class="actions">
+        <button id="copyCurrent" class="primary">复制当前讲稿</button>
+        <button id="copyPrompt">复制评审 Prompt</button>
+        <button id="copyJson">导出 JSON</button>
+      </div>
+    </header>
+
+    <section class="hero" aria-label="方案定位">
+      <div class="thesis">
+        <div class="kicker">Make The Story Credible</div>
+        <h2>不是为了做 Agent，而是传统风控演进到必须重构审核生产方式。</h2>
+        <p>这版把方案从“AI Native 概念展示”调整为“业务痛点驱动的演进故事”：规则爆炸、证据链难收集、灰区案件难解释、反馈难回流，推动系统从机审、人审辅助、AI First，走向 AI Native 闭环。</p>
+      </div>
+      <div class="scorecard" aria-label="可信度速查">
+        <div class="scoreline"><span>业务背景</span><div class="bar"><span style="width: 94%"></span></div><strong>补齐</strong></div>
+        <div class="scoreline"><span>演进逻辑</span><div class="bar"><span style="width: 92%"></span></div><strong>清楚</strong></div>
+        <div class="scoreline"><span>MVP 证据</span><div class="bar"><span style="width: 86%"></span></div><strong>可讲</strong></div>
+        <div class="scoreline"><span>评测深度</span><div class="bar"><span style="width: 80%"></span></div><strong>待专项</strong></div>
+      </div>
+    </section>
+
+    <nav class="navstrip" id="topicNav" aria-label="评审主题"></nav>
+
+    <main class="workbench">
+      <section class="panel" aria-label="方案面板">
+        <div class="pane-head">
+          <div>
+            <div class="smallcap">Review Board</div>
+            <h2 id="topicHeading">评审主题</h2>
+          </div>
+          <span class="tag" id="topicTag">主题</span>
+        </div>
+        <div class="definition">
+          <h3 id="topicTitle"></h3>
+          <p id="topicDefinition"></p>
+          <div class="essence" id="topicEssence"></div>
+        </div>
+        <div id="topicBody"></div>
+      </section>
+
+      <aside class="script" aria-label="讲述脚本">
+        <div class="pane-head">
+          <div>
+            <div class="smallcap">Talk Track</div>
+            <h2 id="scriptHeading">讲述脚本</h2>
+          </div>
+        </div>
+        <div class="tabs">
+          <button data-mode="brief" class="active">30 秒</button>
+          <button data-mode="deep">2 分钟</button>
+          <button data-mode="defense">追问防线</button>
+        </div>
+        <article class="talk-card">
+          <h3>建议讲法</h3>
+          <pre id="answerText"></pre>
+        </article>
+        <article class="talk-card">
+          <h3>可信度信号</h3>
+          <div class="chip-row" id="signalList"></div>
+        </article>
+        <article class="talk-card">
+          <h3>不要这么讲</h3>
+          <ul class="note-list" id="avoidList"></ul>
+        </article>
+      </aside>
+    </main>
+
+    <section class="qa-zone" aria-label="问答素材">
+      <div class="qa-head">
+        <div>
+          <div class="smallcap">Integration Bank</div>
+          <h2>评审与面试高频追问素材</h2>
+        </div>
+        <div class="qa-tools" id="qaFilters"></div>
+      </div>
+      <div class="qa-grid" id="qaGrid"></div>
+    </section>
+  </div>
+
+  <div class="copy-toast" id="toast">已复制</div>
+
+  <script>
+    const topics = [
+      {
+        id: "business",
+        nav: "1 业务背景",
+        tag: "Why",
+        title: "传统风控不是缺一个 AI 助手，而是审核生产方式遇到系统性瓶颈",
+        definition: "业务背景要先讲真实风控矛盾：规则持续膨胀、风险形态变化快、证据散落在多系统、灰区案件依赖专家经验、复核与申诉反馈难以反哺体系。",
+        essence: "本质：不是模型能力展示，而是风控从规则驱动走向证据驱动、协同驱动和反馈驱动的必然演进。",
+        body: {
+          type: "grid",
+          cards: [
+            ["规则爆炸增长", "业务、黑产和监管变化让规则越来越多，优先级、冲突、覆盖范围和版本治理变复杂。", "red"],
+            ["证据链难收集", "行为日志、交易、设备/IP、图谱、历史处罚和相似案例分散在不同系统，人工查证成本高。", "amber"],
+            ["灰区案件难解释", "规则能命中风险，但很难解释为什么、证据是否充分、是否需要升级复核。", "blue"],
+            ["专家经验难复用", "审核员靠经验串联规则、案例和工具，但经验沉淀慢，新人训练成本高。", "green"],
+            ["反馈回流慢", "复核、质检、申诉、误杀漏放案例没有稳定进入知识、规则、评测和工具迭代。", "amber"],
+            ["治理要求提高", "高影响处置需要证据、审计、人工复核、灰度发布和回滚机制。", "red"]
+          ]
+        },
+        scripts: {
+          brief: "这个方案的出发点不是“我们想做一个 Agent”，而是传统风控审核到了系统性瓶颈：规则越来越多，证据散在多个系统，灰区案件靠专家经验，复核和申诉反馈又很难反哺规则和知识体系。所以 AI 原生风控平台要解决的是审核生产方式升级，而不是加一个问答助手。",
+          deep: "传统风控的第一道防线是规则引擎和模型打分，它们适合高并发、低延时、结构化判断。但审核环节面对的是另一类问题：规则命中后为什么有风险、证据是否充分、是否误杀、是否该转人工、申诉是否推翻原判断。这些问题需要跨系统查证、规则解释、案例类比和反馈归因。过去这些能力主要依赖资深审核员，现在可以通过 Agent 把证据收集、规则对齐、审核 artifact 和反馈闭环结构化。",
+          defense: "如果被质疑方案虚浮，要回到业务痛点：规则爆炸、证据链难收集、灰区案件难解释、专家经验难复制、反馈难回流。再强调 Agent 不承接全量实时风控，而是处理规则分流后的复杂审核、解释、复核和进化。"
+        },
+        signals: ["业务真实度", "不是为 AI 而 AI", "风控生产边界", "可信出发点"],
+        avoid: ["开场就说做 AI Native。", "只说审核慢，不说规则、证据、反馈割裂。", "暗示 Agent 替代实时规则引擎。"]
+      },
+      {
+        id: "evolution",
+        nav: "2 演进路径",
+        tag: "Story",
+        title: "从机审到 AI Native，要讲成连续演进，而不是概念跳跃",
+        definition: "演进路径应从规则机审、人审辅助、AI First 到 AI Native 闭环，解释每一阶段解决什么问题、留下什么瓶颈、下一阶段为什么出现。",
+        essence: "本质：AI Native 不是突然出现的新项目，而是传统风控能力演进到一定阶段后的系统重构。",
+        body: {
+          type: "compare",
+          cols: 5,
+          headers: ["阶段", "核心形态", "解决什么", "留下什么问题", "下一步"],
+          rows: [
+            ["机审", "规则引擎 + 模型打分", "高并发实时判断，快速放行、拦截、二次验证", "规则膨胀、解释弱、复杂灰区仍需人工", "AI 辅助人审"],
+            ["智能审核", "AI 辅助审核员查证据、总结案件、生成建议", "降低人工查证和整理成本", "AI 仍是工具，反馈难进入规则和知识体系", "AI 驱动规则制定"],
+            ["AI First", "AI 优先生成证据链、候选规则、处置建议，人做复核", "把专家经验转成结构化 artifact 和候选更新", "仍需更强治理、评测和闭环", "AI 驱动人机协同"],
+            ["AI Native", "Agent + Trace + Eval + Feedback + Governance", "形成可执行、可审计、可评测、可进化的风控闭环", "高影响动作仍需人审，生产发布需灰度回滚", "受控自治"]
+          ]
+        },
+        scripts: {
+          brief: "我会把演进讲成四步：第一阶段是机审，规则引擎和模型负责实时判断；第二阶段是智能审核，AI 辅助人审查证据、总结案件；第三阶段是 AI First，AI 优先生成证据链、候选规则和处置建议，人做复核；第四阶段才是 AI Native，把执行、Trace、Eval、反馈和治理串成闭环。",
+          deep: "这条演进线是：AI 辅助人审 -> AI 驱动规则制定 -> AI 驱动人机协同 -> AI 原生闭环。AI 辅助人审解决人工查证效率；AI 驱动规则制定把复核和申诉经验沉淀为候选规则、案例和评测样本；AI 驱动人机协同把 Agent 输出 artifact、人做高风险裁决作为标准流程；AI Native 闭环则把 AgentRun、Trace、Eval、Feedback、Iteration 和 Governance 连接起来，让系统不是一次性提效工具，而是持续进化的风控平台。",
+          defense: "如果面试官问“为什么现在才 AI Native”，回答是：前面阶段已经有规则、模型、工单、复核和反馈数据，但它们没有形成可执行、可评测、可回滚的闭环。大模型和 Agent 的价值在于把非固定流程的证据查找、规则解释和反馈归因结构化。"
+        },
+        signals: ["故事完整", "演进逻辑", "不是概念拼贴", "阶段边界"],
+        avoid: ["直接从传统风控跳到 AI Native。", "把 AI First 和 AI Native 混为一谈。", "说越 AI Native 就越少人参与。"]
+      },
+      {
+        id: "architecture",
+        nav: "3 目标架构",
+        tag: "What",
+        title: "目标架构是实时决策层、案件审核层、反馈进化层三段式闭环",
+        definition: "AI 原生风控平台不让 Agent 进入全量实时请求主链路，而是由实时规则和模型分流复杂案件，再由 Agent 完成证据组织、审核建议和反馈进化。",
+        essence: "本质：规则引擎负责快和稳，Agent 负责复杂研判、可解释、复核辅助和体系进化。",
+        body: {
+          type: "flow",
+          nodes: [
+            ["实时决策层", "风控网关、特征服务、规则引擎、模型打分、名单和阈值，输出 allow / block / challenge / review。"],
+            ["案件生成", "灰区、高影响、申诉和质检案件生成 RiskCase，并固化 Evidence Snapshot、Rule Version 和原因码。"],
+            ["案件审核层", "Risk Review Orchestrator 基于知识、上下文和证据工具做触发式推理，输出审核 artifact。"],
+            ["人机协同", "高风险、低置信、规则冲突和高影响处置进入人工复核，保留责任边界。"],
+            ["反馈进化层", "复核、质检、申诉和误杀漏放进入归因，生成规则候选、案例库、评测样本和灰度方案。"],
+            ["治理发布", "候选更新经过人工审核、离线评测、灰度监控和可回滚发布后反哺规则、知识、工具和 Harness。"]
+          ]
+        },
+        scripts: {
+          brief: "目标架构不是 Agent 替代规则引擎，而是三层：实时决策层负责高并发、低延时；案件审核层由 Risk Review Orchestrator 处理灰区和复杂案件；反馈进化层把复核、质检、申诉和误杀漏放沉淀为规则候选、案例库和评测集。",
+          deep: "生产级风控要先区分实时决策和案件审核。登录、交易、内容发布等全量请求仍由规则引擎、特征服务和模型打分处理，保证毫秒级和稳定性。Agent 位于 review 之后，处理规则分流出来的复杂案件。它基于 RiskCase、Evidence Snapshot、Rule Version、日志、图谱、历史案例和 SOP 输出证据链、风险判断、建议动作、置信度和转人工原因。人工反馈再进入知识治理、评测回归和策略进化。",
+          defense: "如果被问高并发怎么办，回答是：Agent 不吃全量在线请求。规则引擎和模型负责实时主链路，Agent 通过队列、Worker 池、限步数、限工具、限 token 和超时降级处理审核案件。"
+        },
+        signals: ["生产边界", "规则引擎协同", "三层架构", "高并发意识"],
+        avoid: ["让 LLM Agent 承接全量请求。", "只画 Agent 内部五条主线，不画上游实时层。", "忽略 Evidence Snapshot 和 Rule Version。"]
+      },
+      {
+        id: "agent",
+        nav: "4 Agent 实现",
+        tag: "How",
+        title: "策略理解不是固定流水线，更适合触发器驱动的推理式 Agent",
+        definition: "对策略理解、证据查找、规则解释这类非固定流程任务，Agent 不应只按固定 workflow 走完步骤，而应基于 trigger 和观察结果动态决定下一步查什么证据。",
+        essence: "本质：用受控的 Reason / Act / Observe 机制模拟资深审核员寻找证据的过程。",
+        body: {
+          type: "compare",
+          cols: 3,
+          headers: ["维度", "固定 Workflow", "Trigger-based Reasoning"],
+          rows: [
+            ["适合任务", "流程稳定、步骤确定、输入输出标准化", "证据路径不固定、需要根据发现继续追查"],
+            ["执行方式", "按预设节点依次执行", "由风险 trigger、证据缺口和观察结果驱动下一步"],
+            ["优点", "稳定、可预测、易测试", "更像人类审核员，能自主寻找关联证据"],
+            ["风险", "遇到新型风险或复杂灰区不灵活", "非确定性、成本和延迟更高，需要 Harness 控制"],
+            ["风控用法", "基础上下文构建、固定证据查询、结构化输出", "策略理解、复杂证据追查、规则冲突解释、申诉归因"]
+          ]
+        },
+        scripts: {
+          brief: "对固定流程任务可以用 workflow，但策略理解和复杂证据查找不适合完全固定编排。我会采用 trigger-based reasoning：风险 trigger 触发 Agent，Agent 根据证据缺口和工具观察结果，动态决定下一步查日志、查图谱、查历史案例还是查规则，并通过 Harness 限制工具、步数、动作和转人工边界。",
+          deep: "风控审核里有些步骤是固定的，比如构建上下文、查询基础证据、输出结构化 artifact，这些适合 workflow。但策略理解、规则冲突、灰区案件和申诉复核往往不是固定路径，资深审核员会根据一个异常点继续查设备、交易、图谱、历史处罚和相似案例。所以实现上我会保留统一 Orchestrator，用固定流程兜底，用 trigger-based reasoning 处理非固定证据路径，并用 Trace 记录每一步 Reason、Action、Observation 和 State Update。",
+          defense: "如果被问“Agent 自主会不会失控”，回答是：自主只发生在受控范围内。Harness 限制工具白名单、最大步数、超时、成本、数据权限和高影响动作；低置信、证据不足、规则冲突必须转人工。"
+        },
+        signals: ["实现判断", "不是机械 workflow", "Agent Harness", "动态证据查找"],
+        avoid: ["所有任务都用 Agent 自主跑。", "所有任务都固定 workflow，不承认策略理解的动态性。", "讲 reasoning 却不讲边界和 Trace。"]
+      },
+      {
+        id: "mvp",
+        nav: "5 MVP 证据",
+        tag: "Progress",
+        title: "MVP 要明确讲已经跑通了什么，而不是只讲终局愿景",
+        definition: "MVP 版本应表达为：已跑通 AI Native 风控审核的工程骨架和最小闭环，包括 AgentRun、风险上下文、证据工具、Trace、HITL、Eval、Feedback 和受控迭代。",
+        essence: "本质：用可演示的工程证据支撑愿景，避免方案显得虚浮。",
+        body: {
+          type: "grid",
+          cards: [
+            ["AgentRun 与模式切换", "一次审核案件可作为 AgentRun 执行，支持固定 Workflow 与 Agent Loop 两种模式。", "green"],
+            ["Risk Review Context", "上下文中已有 RISK_REVIEW_CONTEXT、triggerReason、风险类型和事件描述等字段。", "blue"],
+            ["证据工具调用", "已有 queryRiskEvidence 这类案件级证据工具，能模拟规则命中、设备关系和交易异常。", "amber"],
+            ["Trace 可观测", "记录 CONTEXT_BUILD、RISK_DETECTION、EVIDENCE_GAP_CHECK、CASE_ROUTING、CONTROLLED_EVOLUTION 等关键步骤。", "green"],
+            ["Harness 与 HITL", "高风险案件要求 HUMAN_REVIEW_REQUIRED，并阻断自动封禁、冻结资金等高影响动作。", "red"],
+            ["Eval 与 Feedback", "人工反馈可进入 EvalSample，TraceEval 能检查证据链、规则依据、人工流转和受控进化。", "blue"]
+          ]
+        },
+        scripts: {
+          brief: "MVP 不说已经是完整生产系统，而是说已经跑通最小闭环：AgentRun 承载一次审核，Risk Review Context 组装风险上下文，queryRiskEvidence 提供证据工具，Trace 记录风险识别、证据缺口、案件流转和受控进化，HITL 处理高风险动作，Eval 和 Feedback 支持回归评测。",
+          deep: "当前 MVP 的价值是证明工程骨架可行。它不是直接上线承载真实风控，而是跑通 AI Native Agent 平台的关键链路：任务运行、上下文构建、知识检索、证据工具、工具治理、人工复核、Trace 可观测、反馈样本和评测回放。风控语义上，已有 triggerReason、risk-review-agent 角色、RISK_REVIEW_CONTEXT、queryRiskEvidence、EVIDENCE_GAP_CHECK、CASE_ROUTING、CONTROLLED_EVOLUTION 等关键节点，可以支撑面试中讲清楚阶段性进展。",
+          defense: "如果被问“是不是客服 Demo 换皮”，回答是：平台骨架来自客服工单场景，但风控领域需要替换知识资产、上下文、证据工具、输出 artifact、Harness 边界和评测指标。MVP 已验证骨架，下一步是补真实风险样本、领域对象和评测集。"
+        },
+        signals: ["阶段性成果", "诚实边界", "工程证据", "可演示"],
+        avoid: ["把 MVP 说成完整生产系统。", "只讲愿景不讲已实现能力。", "虚构真实线上指标。"]
+      },
+      {
+        id: "eval",
+        nav: "6 Agent 评测",
+        tag: "Eval",
+        title: "Agent 评测要分性能、稳定性、效果三层，不能只评回答好不好",
+        definition: "AI Agent 评测包括性能评测、系统稳定性评测和效果评测。效果评测可结合 golden set、人工标注、teacher model、LLM-as-judge 和真实 Trace 回放。",
+        essence: "本质：评测对象不是单次文本输出，而是 Agent 的任务完成质量、证据过程、风险边界和线上可用性。",
+        body: {
+          type: "compare",
+          cols: 4,
+          headers: ["评测层", "看什么", "方法", "风控指标"],
+          rows: [
+            ["性能评测", "首 Token 延迟、端到端耗时、工具调用耗时、成本", "压测、分位数监控、Worker 池限流、token 成本统计", "P95/P99、超时率、成本/案、队列等待时长"],
+            ["稳定性评测", "是否崩溃、是否越权、工具是否失败、流程是否可恢复", "故障注入、工具 mock、重试降级、权限断言、Trace 完整性检查", "工具成功率、重试率、降级率、Trace 缺失率"],
+            ["效果评测", "证据是否完整、规则是否引用正确、建议是否可采纳", "Golden Set、人工标注、teacher model 对比、LLM Judge、人审抽检", "证据完整率、规则准确率、采纳率、误杀率、漏放率、申诉推翻率"]
+          ]
+        },
+        scripts: {
+          brief: "Agent 评测我会分三层：性能评测看首 Token、端到端延迟、工具耗时和成本；系统稳定性评测看工具成功率、越权、降级、Trace 完整性；效果评测看证据链完整、规则引用准确、审核建议是否被采纳。效果层可以用 golden set、人工标注、teacher model 对比和 LLM-as-judge，但高风险样本必须有人审校准。",
+          deep: "风控 Agent 不能只评最终回答，要评完整链路。性能上看首 Token 延迟、P95/P99、工具调用耗时、队列积压和成本/案；稳定性上看工具失败、权限拦截、重试降级、Trace 是否完整、是否正确转人工；效果上构建 golden set，覆盖正常、灰区、误杀、漏放、规则冲突、申诉推翻和高影响处置。Teacher model 可以作为对比基线，LLM-as-judge 可以辅助打分，但最终要有人审抽检，尤其是误杀漏放这类高风险指标。",
+          defense: "如果被追问 teacher model 怎么用，回答是：teacher model 不直接当真理，而是用于生成参考判断、发现差异和辅助标注；正式评测仍以 golden set、人工审核、业务规则断言和线上反馈为准。"
+        },
+        signals: ["评测深度", "上线意识", "不只看答案", "专项会议入口"],
+        avoid: ["只说准确率。", "只用 LLM-as-judge 不做人工校准。", "不区分性能、稳定性和效果。"]
+      },
+      {
+        id: "story",
+        nav: "7 讲述顺序",
+        tag: "Narrative",
+        title: "推荐讲述顺序：背景痛点 -> 演进路径 -> MVP -> 架构方案 -> 评测治理",
+        definition: "讲述顺序要先建立业务可信度，再讲演进合理性，然后用 MVP 证明不是空想，最后展开架构、实现和评测。",
+        essence: "本质：先让听众相信“为什么必须做”，再让听众相信“你知道怎么做且已经开始做”。",
+        body: {
+          type: "flow",
+          nodes: [
+            ["出发点", "规则爆炸、证据链难收集、灰区案件难解释、反馈难回流。"],
+            ["演进路径", "机审 -> 智能审核 -> AI First -> AI Native；AI 辅助人审 -> AI 驱动规则制定 -> AI 驱动人机协同 -> AI 原生闭环。"],
+            ["MVP 进展", "已跑通 AgentRun、风险上下文、证据工具、Trace、HITL、Eval、Feedback 和受控迭代骨架。"],
+            ["目标方案", "实时决策层、案件审核层、反馈进化层；统一 Risk Review Orchestrator + 异步治理 Worker。"],
+            ["技术实现", "固定 Workflow 兜底，trigger-based reasoning 处理非固定证据路径，Harness 控制边界。"],
+            ["评测治理", "性能、稳定性、效果三层评测，golden set、teacher model、人审抽检、灰度回滚。"]
+          ]
+        },
+        scripts: {
+          brief: "我建议按六步讲：先讲传统风控痛点，再讲从机审到 AI Native 的演进路径，然后讲 MVP 已经跑通的能力，再讲三层目标架构，接着讲 trigger-based reasoning 的 Agent 实现，最后讲性能、稳定性和效果三层评测。",
+          deep: "这版汇报的重点是把故事讲圆。第一，不从 AI Native 概念开场，而从规则爆炸、证据链、灰区案件和反馈断层开场。第二，解释为什么系统从机审、人审辅助、AI First 演进到 AI Native。第三，明确 MVP 已经实现的是工程骨架和最小闭环，不夸大生产能力。第四，架构上强调 Agent 在规则引擎之后，处理复杂审核和进化。第五，评测上主动讲性能、稳定性、效果，提前回应面试官会追的问题。",
+          defense: "内部评审时建议重点看三件事：业务背景是否真实，MVP 进展是否说得过头，评测方案是否能经得住追问。讲述顺序建议固定，避免又回到技术名词堆叠。"
+        },
+        signals: ["故事完整", "汇报顺序", "可信表达", "评审准备"],
+        avoid: ["先讲技术栈。", "MVP 和终局混在一起。", "不主动讲评测。"]
+      }
+    ];
+
+    const qaItems = [
+      ["业务背景", "为什么不是简单做一个审核助手？", "因为核心矛盾不是缺问答入口，而是规则爆炸、证据链难收集、灰区案件难解释、专家经验难复用和反馈难回流。审核助手只能局部提效，AI 原生平台要重构审核生产方式。"],
+      ["演进路径", "机审、智能审核、AI First、AI Native 怎么区分？", "机审靠规则和模型做实时判断；智能审核用 AI 辅助人审；AI First 让 AI 优先生成证据链、候选规则和建议，人做复核；AI Native 把 AgentRun、Trace、Eval、Feedback、Governance 串成持续进化闭环。"],
+      ["架构边界", "Agent 会替代规则引擎吗？", "不会。规则引擎负责全量实时主链路，Agent 处理 review 后的灰区、高影响、申诉和复杂解释案件，并把反馈反哺规则、知识和评测体系。"],
+      ["实现方法", "为什么策略理解更适合 trigger-based reasoning？", "因为证据路径不固定，Agent 需要根据风险 trigger、证据缺口和工具观察结果动态决定下一步查什么，而不是固定走完一套流程。"],
+      ["MVP", "当前 MVP 到底实现了什么？", "跑通了 AgentRun、风险上下文、证据工具、Trace、HITL、Eval、Feedback 和受控迭代骨架，能证明最小 AI Native 风控审核闭环，不等于完整生产系统。"],
+      ["评测", "Agent 评测怎么做？", "分性能、稳定性、效果三层。性能看首 Token、P95/P99、成本；稳定性看工具成功率、越权、降级、Trace 完整性；效果看证据完整率、规则准确率、人工采纳率、误杀漏放和申诉推翻。"],
+      ["评测", "Golden set 和 teacher model 怎么用？", "Golden set 作为固定回归集，覆盖正常、灰区、误杀、漏放、规则冲突和高影响处置；teacher model 用于生成参考判断和辅助标注，但不能替代人工校准。"],
+      ["人机协同", "人的角色是什么？", "人负责目标定义、风险红线、高风险裁决、异常纠偏、候选更新审核和体系治理；Agent 负责证据收集、规则对齐、初步研判、artifact 和候选更新生成。"],
+      ["讲述顺序", "评审时建议怎么讲？", "背景痛点 -> 演进路径 -> MVP 进展 -> 三层目标架构 -> Agent 实现方式 -> 三层评测治理。"],
+      ["风险边界", "怎么避免 AI 自进化污染系统？", "反馈先归因，再生成候选；候选先人工审核、离线评测和灰度验证，再发布；高影响规则、工具权限和处置边界必须可追溯、可评估、可回滚。"]
+    ];
+
+    let activeTopic = 0;
+    let activeMode = "brief";
+    let activeFilter = "全部";
+
+    const $ = (id) => document.getElementById(id);
+
+    function showToast(text = "已复制") {
+      const toast = $("toast");
+      toast.textContent = text;
+      toast.classList.add("show");
+      window.setTimeout(() => toast.classList.remove("show"), 1400);
+    }
+
+    async function copyText(text, message) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(message);
+      } catch (error) {
+        const area = document.createElement("textarea");
+        area.value = text;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+        showToast(message);
+      }
+    }
+
+    function renderNav() {
+      const nav = $("topicNav");
+      nav.innerHTML = "";
+      topics.forEach((topic, index) => {
+        const btn = document.createElement("button");
+        btn.textContent = topic.nav;
+        btn.className = index === activeTopic ? "active" : "";
+        btn.addEventListener("click", () => {
+          activeTopic = index;
+          render();
+        });
+        nav.appendChild(btn);
+      });
+    }
+
+    function renderBody(topic) {
+      if (topic.body.type === "compare") {
+        const cols = topic.body.cols || 3;
+        const header = topic.body.headers.map(item => `<div class="head">${item}</div>`).join("");
+        const rows = topic.body.rows.map(row => row.map((cell, index) => `<div class="${index === 0 ? "label" : ""}">${cell}</div>`).join("")).join("");
+        return `<div class="compare cols-${cols}">${header}${rows}</div>`;
+      }
+      if (topic.body.type === "flow") {
+        return `<div class="flow">${topic.body.nodes.map((node, index) => `
+          <div class="flow-node">
+            <div class="num">${index + 1}</div>
+            <div><b>${node[0]}</b><span>${node[1]}</span></div>
+          </div>
+        `).join("")}</div>`;
+      }
+      return `<div class="grid-3">${topic.body.cards.map(card => `
+        <div class="cell ${card[2] || ""}">
+          <h4>${card[0]}</h4>
+          <p>${card[1]}</p>
+        </div>
+      `).join("")}</div>`;
+    }
+
+    function renderTopic() {
+      const topic = topics[activeTopic];
+      $("topicHeading").textContent = topic.nav.replace(/^\d+\s/, "");
+      $("scriptHeading").textContent = topic.nav.replace(/^\d+\s/, "") + "讲法";
+      $("topicTag").textContent = topic.tag;
+      $("topicTitle").textContent = topic.title;
+      $("topicDefinition").textContent = topic.definition;
+      $("topicEssence").textContent = topic.essence;
+      $("topicBody").innerHTML = renderBody(topic);
+      $("answerText").textContent = topic.scripts[activeMode];
+      $("signalList").innerHTML = topic.signals.map(item => `<span class="chip">${item}</span>`).join("");
+      $("avoidList").innerHTML = topic.avoid.map(item => `<li>${item}</li>`).join("");
+      document.querySelectorAll(".tabs button").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.mode === activeMode);
+      });
+    }
+
+    function renderQaFilters() {
+      const filters = ["全部", ...Array.from(new Set(qaItems.map(item => item[0])))];
+      $("qaFilters").innerHTML = filters.map(item => `<button class="${item === activeFilter ? "active" : ""}" data-filter="${item}">${item}</button>`).join("");
+      $("qaFilters").querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          activeFilter = btn.dataset.filter;
+          renderQaFilters();
+          renderQa();
+        });
+      });
+    }
+
+    function renderQa() {
+      const list = activeFilter === "全部" ? qaItems : qaItems.filter(item => item[0] === activeFilter);
+      $("qaGrid").innerHTML = list.map((item, index) => `
+        <details ${index === 0 ? "open" : ""}>
+          <summary>${item[1]}<span>${item[0]}</span></summary>
+          <p>${item[2]}</p>
+        </details>
+      `).join("");
+    }
+
+    function reviewPrompt() {
+      const topic = topics[activeTopic];
+      return [
+        "请扮演严苛的 AI 原生风控平台方案评审专家。",
+        "当前评审主题：" + topic.nav + " / " + topic.tag,
+        "我的讲法：",
+        topic.scripts[activeMode],
+        "",
+        "请按以下维度评审：",
+        "1. 业务背景是否真实，是否能解释为什么必须做。",
+        "2. 演进路径是否顺，是否从机审、智能审核、AI First 讲到 AI Native。",
+        "3. 是否清楚区分实时规则引擎、案件审核 Agent 和反馈进化层。",
+        "4. MVP 说法是否可信，是否有夸大生产能力。",
+        "5. Agent 评测是否覆盖性能、稳定性和效果。",
+        "6. 给出更适合面试/内部评审的 30 秒版本。"
+      ].join("\n");
+    }
+
+    function exportJson() {
+      return JSON.stringify({
+        title: "AI 原生风控平台评审整合版",
+        activeTopic: topics[activeTopic].nav,
+        activeMode,
+        topic: topics[activeTopic],
+        qa: qaItems.map(([category, question, answer]) => ({ category, question, answer }))
+      }, null, 2);
+    }
+
+    function render() {
+      renderNav();
+      renderTopic();
+      renderQaFilters();
+      renderQa();
+    }
+
+    document.querySelectorAll(".tabs button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        activeMode = btn.dataset.mode;
+        renderTopic();
+      });
+    });
+    $("copyCurrent").addEventListener("click", () => copyText(topics[activeTopic].scripts[activeMode], "当前讲稿已复制"));
+    $("copyPrompt").addEventListener("click", () => copyText(reviewPrompt(), "评审 Prompt 已复制"));
+    $("copyJson").addEventListener("click", () => copyText(exportJson(), "JSON 已复制"));
+
+    render();
+  </script>
+</body>
+</html>
